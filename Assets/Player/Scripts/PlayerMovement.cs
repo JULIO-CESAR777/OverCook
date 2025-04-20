@@ -112,7 +112,7 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
-            footstepTimer = 0f; // reiniciar cuando no se mueve
+            footstepTimer = 0f;
         }
     }
 
