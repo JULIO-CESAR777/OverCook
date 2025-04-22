@@ -21,6 +21,7 @@ public class PlayerInteractions : MonoBehaviour
     public Camera mainCamera;
 
     private GameObject currentInteractable;
+    public GameObject grabObject;
 
     public GameObject handPosition;
 
@@ -64,7 +65,7 @@ public class PlayerInteractions : MonoBehaviour
 
         if (Physics.SphereCast(ray, 0.3f, out hit, rayDistance)) // ← esto amplía el rango
         {
-            if (hit.collider.CompareTag(interactTag[0]))
+            if (hit.collider.CompareTag(interactTag[0]) && !isDoingAnAction)
             {
                 currentInteractable = hit.collider.gameObject;
                 interfaceText.text = "Press F to interact";
@@ -73,7 +74,7 @@ public class PlayerInteractions : MonoBehaviour
                 return;
             }
 
-            if(hit.collider.CompareTag(interactTag[1])){
+            if(hit.collider.CompareTag(interactTag[1]) && !isDoingAnAction){
                 currentInteractable = hit.collider.gameObject;
                 interfaceText.text = "Press F to grab";
                 textInteractions.SetActive(true);
@@ -87,21 +88,33 @@ public class PlayerInteractions : MonoBehaviour
 
     private void OnInteract(InputAction.CallbackContext context)
     {
+        //Interacciones cuando un objeto es detectado enfrente
         if (currentInteractable != null)
         {
+            //Accion cuando es una caja de ingredientes
             if(currentInteractable.CompareTag(interactTag[0])){
                 if(isDoingAnAction) return;
 
                 var interactable = currentInteractable.GetComponent<IngredientSpawner>();
                 interactable?.SpawnIngredient();
             }
-
+            //Accion cuando es un ingrediente
             if(currentInteractable.CompareTag(interactTag[1])){
                 isDoingAnAction = true;
                 //Grab Ingredient
                 var interactable = currentInteractable.GetComponent<TakeIngredient>();
+                grabObject = interactable.gameObject;
                 interactable?.BeingGrab(handPosition);
+                
+                currentInteractable = null;
             }
+        }
+        //Comprobacion cuando se quiere soltar un objeto
+        else if(currentInteractable == null && isDoingAnAction )
+        {
+            grabObject.GetComponent<TakeIngredient>().Drop();
+            grabObject = null;
+            isDoingAnAction = false;
         }
     }
 }

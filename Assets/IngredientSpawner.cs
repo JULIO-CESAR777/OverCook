@@ -1,3 +1,4 @@
+using Unity.XR.CoreUtils;
 using UnityEngine;
 
 public class IngredientSpawner : MonoBehaviour
@@ -11,11 +12,12 @@ public class IngredientSpawner : MonoBehaviour
     void Awake()
     {
         topOfTheBox = GetComponentInChildren<BoxCollider>();
-        canSpawnIngredient = true;
     }
 
     public void SpawnIngredient()
     {
+        Transform child = transform.GetChild(0);
+        canSpawnIngredient = child.GetComponent<ChecksTopBox>().canSpawnIngredient;
         if (!canSpawnIngredient)
         {
             Debug.Log("Box is already full. Can't spawn.");
@@ -23,27 +25,6 @@ public class IngredientSpawner : MonoBehaviour
         }
 
         Instantiate(ingredient, spawnPoint.position, spawnPoint.rotation);
-        canSpawnIngredient = false;
     }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Ingredient"))
-        {
-            Debug.Log("Ingredient entered box");
-            canSpawnIngredient = false;
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Ingredient"))
-        {
-            Debug.Log("Ingredient left the box");
-            canSpawnIngredient = true;
-        }
-    }
-
-
-
+    
 }
