@@ -35,5 +35,9 @@ public class ChecksTopBox : MonoBehaviour
         {
             canSpawnIngredient = false;
         }
+        else
+        {
+            canSpawnIngredient = true;
+        }
     }
 }
