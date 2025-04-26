@@ -15,7 +15,6 @@ public class ChecksTopBox : MonoBehaviour
     {
         if (other.CompareTag("Ingredient"))
         {
-            Debug.Log("Ingredient entered box");
             canSpawnIngredient = false;
         }
     }
@@ -24,7 +23,6 @@ public class ChecksTopBox : MonoBehaviour
     {
         if (other.CompareTag("Ingredient"))
         {
-            Debug.Log("Ingredient left the box");
             canSpawnIngredient = true;
         }
     }

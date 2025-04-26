@@ -17,13 +17,10 @@ public class IngredientSpawner : MonoBehaviour
 
     public void SpawnIngredient()
     {
-        
-        Debug.Log("Si se esta mandando a llamar");
         Transform child = transform.GetChild(0);
         canSpawnIngredient = child.GetComponent<ChecksTopBox>().canSpawnIngredient;
         if (!canSpawnIngredient)
         {
-            Debug.Log("Box is already full. Can't spawn.");
             return;
         }
 
@@ -36,7 +33,6 @@ public class IngredientSpawner : MonoBehaviour
             if (instance != null)
             {
                 instance.Setup(ingredientSO, state.stateName);
-                Debug.Log(ingredientSO.name + " has been spawned.");
             }
         }
     }

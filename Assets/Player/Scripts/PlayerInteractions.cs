@@ -21,7 +21,7 @@ public class PlayerInteractions : MonoBehaviour
     [Header("References")]
     public Camera mainCamera;
 
-    private GameObject currentInteractable;
+    public GameObject currentInteractable;
     public GameObject grabObject;
 
     public GameObject handPosition;
@@ -61,6 +61,7 @@ public class PlayerInteractions : MonoBehaviour
 
     private void HandleInteractionRaycast()
     {
+        
         Ray ray = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
         RaycastHit hit;
 
@@ -85,7 +86,11 @@ public class PlayerInteractions : MonoBehaviour
             if (hit.collider.CompareTag(interactTag[2]) && isDoingAnAction)
             {
                 currentInteractable = hit.collider.gameObject;
-                interfaceText.text = "Press F to place ingredient";
+
+                interfaceText.text = currentInteractable.GetComponent<PlateController>().recipeCompleted
+                    ? ""
+                    : "Press F to place ingredient";
+                
                 textInteractions.SetActive(true);
                 return;
             }
@@ -105,9 +110,9 @@ public class PlayerInteractions : MonoBehaviour
                 if(isDoingAnAction) return;
 
                 var interactable = currentInteractable.GetComponent<IngredientSpawner>();
-                Debug.Log("Interactuando con la caja");
                 interactable?.SpawnIngredient();
             }
+            
             //Accion cuando es un ingrediente
             if(currentInteractable.CompareTag(interactTag[1])){
                 isDoingAnAction = true;
@@ -117,10 +122,13 @@ public class PlayerInteractions : MonoBehaviour
             }
             
             // Acción cuando es un plato y el jugador tiene un ingrediente en mano
-            if (currentInteractable.CompareTag(interactTag[2]) && isDoingAnAction)
+            if (currentInteractable!=null && currentInteractable.CompareTag(interactTag[2]) && isDoingAnAction)
             {
                 PlaceIngredientOnPlate(currentInteractable);
             }
+            
+            //Agregar el agarre de un plato con una receta completa
+            
         }
         //Comprobacion cuando se quiere soltar un objeto
         else if(currentInteractable == null && isDoingAnAction )
@@ -223,7 +231,6 @@ public class PlayerInteractions : MonoBehaviour
         PlateController plateController = plate.GetComponent<PlateController>();
         if (plateController == null || !plateController.TryAddIngredient(ingredientSO))
         {
-            Debug.Log("Este ingrediente no es necesario o ya está completo.");
             return;
         }
 
@@ -249,7 +256,12 @@ public class PlayerInteractions : MonoBehaviour
 
         grabObject.transform.SetParent(plate.transform); // para que se quede con el plato
         grabObject = null;
+
+        // Restablecer el estado de la acción después de colocar el ingrediente en el plato
         isDoingAnAction = false;
+
+        // Verifica si la receta está completa
+        plateController.CheckRecipeCompletion(); // Esto ya lo tienes para validar si el plato se completó
     }
     
 
