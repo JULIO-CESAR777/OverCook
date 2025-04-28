@@ -41,7 +41,11 @@ public class PlayerInteractions : MonoBehaviour
     private void Start()
     {
         textInteractions = GameObject.Find("InteractText");
-        interfaceText = GameObject.Find("InteractText").GetComponent<TextMeshProUGUI>();
+        if (textInteractions != null)
+        {
+            interfaceText = textInteractions.GetComponent<TextMeshProUGUI>();
+            textInteractions.SetActive(false);
+        }
         handPosition = GameObject.Find("HandHolder");
         
         if (textInteractions != null)
@@ -57,6 +61,16 @@ public class PlayerInteractions : MonoBehaviour
     private void Update()
     {
         HandleInteractionRaycast();
+
+        // Detectar si está cortando
+        if (interactAction.action.IsPressed() && currentInteractable != null && currentInteractable.CompareTag(interactTag[3]))
+        {
+            CuttingBoard cuttingBoard = currentInteractable.GetComponent<CuttingBoard>();
+            if (cuttingBoard != null && cuttingBoard.ingredientOnBoard != null)
+            {
+                cuttingBoard.cutIngredient();
+            }
+        }
     }
 
     private void HandleInteractionRaycast()
@@ -67,6 +81,7 @@ public class PlayerInteractions : MonoBehaviour
 
         if (Physics.SphereCast(ray, 0.3f, out hit, rayDistance)) // ← esto amplía el rango
         {
+            //Interactuable
             if (hit.collider.CompareTag(interactTag[0]) && !isDoingAnAction)
             {
                 currentInteractable = hit.collider.gameObject;
@@ -75,14 +90,14 @@ public class PlayerInteractions : MonoBehaviour
 
                 return;
             }
-
+            // Algo agarrable
             if(hit.collider.CompareTag(interactTag[1]) && !isDoingAnAction){
                 currentInteractable = hit.collider.gameObject;
                 interfaceText.text = "Press F to grab";
                 textInteractions.SetActive(true);
                 return;
             }
-            
+            //Colocar ingrediente en plato
             if (hit.collider.CompareTag(interactTag[2]) && isDoingAnAction)
             {
                 currentInteractable = hit.collider.gameObject;
@@ -94,6 +109,16 @@ public class PlayerInteractions : MonoBehaviour
                 textInteractions.SetActive(true);
                 return;
             }
+            // Interaccion en tabla de cortar
+            if(hit.collider.CompareTag(interactTag[3])){
+                if(isDoingAnAction || hit.collider.gameObject.GetComponent<CuttingBoard>().ingredientOnBoard != null){
+                    currentInteractable = hit.collider.gameObject;
+                    interfaceText.text = "Press F to cut";
+                    textInteractions.SetActive(true);
+                    return;
+                }
+            }
+
         }
 
         currentInteractable = null;
@@ -108,7 +133,6 @@ public class PlayerInteractions : MonoBehaviour
             //Accion cuando es una caja de ingredientes
             if(currentInteractable.CompareTag(interactTag[0])){
                 if(isDoingAnAction) return;
-
                 var interactable = currentInteractable.GetComponent<IngredientSpawner>();
                 interactable?.SpawnIngredient();
             }
@@ -127,7 +151,22 @@ public class PlayerInteractions : MonoBehaviour
                 PlaceIngredientOnPlate(currentInteractable);
             }
             
-            //Agregar el agarre de un plato con una receta completa
+            // Acción en una tabla de cortar
+            if (currentInteractable != null && currentInteractable.CompareTag(interactTag[3]))
+            {
+                var cuttingBoard = currentInteractable.GetComponent<CuttingBoard>();
+
+                if (isDoingAnAction && cuttingBoard != null && cuttingBoard.ingredientOnBoard == null)
+                {
+                    // Si estamos agarrando algo Y no hay ingrediente en la tabla → colocar ingrediente
+                    PlaceIngredientOnCuttingBoard(currentInteractable);
+                }
+                else if (cuttingBoard != null && cuttingBoard.readyToCut)
+                {
+                    // Si ya hay un ingrediente colocado y está listo para cortar → cortar
+                    cuttingBoard.cutIngredient();
+                }
+            }
             
         }
         //Comprobacion cuando se quiere soltar un objeto
@@ -144,6 +183,13 @@ public class PlayerInteractions : MonoBehaviour
         
         if (grabObject != null) return; // Ya tienes algo agarrado
 
+        IngredientInstance ingredient = grabbedObject.GetComponent<IngredientInstance>();
+        if (ingredient != null && !ingredient.canBePickedUp)
+        {
+            // Todavía no se puede recoger
+            return;
+        }
+
         StartCoroutine(MoveToHand(grabbedObject));
         
     }
@@ -159,6 +205,8 @@ public class PlayerInteractions : MonoBehaviour
         Vector3 targetPosition = handPosition.transform.position;
         Quaternion targetRotation = handPosition.transform.rotation;
 
+        Vector3 originalScale = obj.transform.localScale; // Guardar la escala original
+
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
@@ -166,24 +214,29 @@ public class PlayerInteractions : MonoBehaviour
 
             obj.transform.position = Vector3.Lerp(startPosition, targetPosition, t);
             obj.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, t);
+        
+            // Asegurarse de que la escala no cambie
+            obj.transform.localScale = originalScale;
 
             yield return null;
         }
-        
+
+        // Asegurarse de que el objeto conserve la escala original después de moverlo
+        obj.transform.localScale = originalScale;
         Rigidbody rb = obj.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.isKinematic = true; // Desactiva física
+            rb.isKinematic = true; // Desactiva la física mientras se mueve
             rb.detectCollisions = false;
         }
 
         Collider col = obj.GetComponent<Collider>();
         if (col != null)
         {
-            col.enabled = false; // Evita colisiones molestas mientras se mueve
+            col.enabled = false; // Evita colisiones mientras se mueve
         }
 
-        // Al final del movimiento
+        // Final del movimiento
         obj.transform.SetParent(handPosition.transform);
         obj.transform.localPosition = Vector3.zero;
         obj.transform.localRotation = Quaternion.identity;
@@ -221,15 +274,16 @@ public class PlayerInteractions : MonoBehaviour
     {
         if (grabObject == null) return;
 
-        // Obtener el IngredientSO desde el objeto
+        // Obtener el IngredientInstance desde el objeto
         IngredientInstance ingredientInstance = grabObject.GetComponent<IngredientInstance>();
         if (ingredientInstance == null) return;
 
-        IngredientSO ingredientSO = ingredientInstance.ingredientData;
-
-        // Intentar añadirlo al plato
+        // Verificar el estado del ingrediente antes de agregarlo
+        Debug.Log("Intentando agregar: " + ingredientInstance.ingredientData.ingredientName + " Estado: " + ingredientInstance.currentState);
+        
+        // Intentar añadirlo al plato, pasando el estado actual
         PlateController plateController = plate.GetComponent<PlateController>();
-        if (plateController == null || !plateController.TryAddIngredient(ingredientSO))
+        if (plateController == null || !plateController.TryAddIngredient(ingredientInstance))
         {
             return;
         }
@@ -264,5 +318,38 @@ public class PlayerInteractions : MonoBehaviour
         plateController.CheckRecipeCompletion(); // Esto ya lo tienes para validar si el plato se completó
     }
     
+
+    public void PlaceIngredientOnCuttingBoard(GameObject cuttingBoard){
+        if (grabObject == null) return;
+
+        // Obtener el IngredientSO desde el objeto
+        IngredientInstance ingredientInstance = grabObject.GetComponent<IngredientInstance>();
+        if (ingredientInstance == null) return;
+
+        // Intentar añadirlo a la tabla
+        CuttingBoard cuttingboard = cuttingBoard.GetComponent<CuttingBoard>();
+        if(cuttingboard == null || !cuttingboard.TryAddIngredient(ingredientInstance)) return;
+        
+        // Si pasó la validación, colocarlo sobre la tabla
+        grabObject.transform.SetParent(null);
+        Vector3 top = cuttingBoard.transform.position + Vector3.up * 0.2f;
+        grabObject.transform.position = top;
+        grabObject.transform.rotation = cuttingBoard.transform.rotation;
+
+        Collider col = grabObject.GetComponent<Collider>();
+        if (col != null)
+        {
+            col.enabled = false;
+        }
+
+        grabObject.transform.SetParent(cuttingBoard.transform); // para que se quede con el plato
+        grabObject = null;
+        ingredientInstance.canBePickedUp = false;
+
+        // Restablecer el estado de la acción después de colocar el ingrediente en el plato
+        isDoingAnAction = false;
+         
+    }
+
 
 }

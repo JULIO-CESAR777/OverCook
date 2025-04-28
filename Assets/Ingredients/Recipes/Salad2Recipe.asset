@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 03e1bc3005136364ba1f741f1b48e96f, type: 3}
-  m_Name: SaladRecipe
+  m_Name: Salad2Recipe
   m_EditorClassIdentifier: 
-  recipeName: Ensalada
+  recipeName: ProSalad
   icon: {fileID: 0}
   ingredientsRequired:
   - ingredient: {fileID: 11400000, guid: 544b7a5c796ecbb4a8b8193680383aa8, type: 2}

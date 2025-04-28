@@ -8,6 +8,7 @@ TagManager:
   - Interactable
   - Ingredient
   - Plate
+  - CuttingBoard
   layers:
   - Default
   - TransparentFX
