@@ -81,6 +81,7 @@ public class PlayerInteractions : MonoBehaviour
 
         if (Physics.SphereCast(ray, 0.3f, out hit, rayDistance)) // ← esto amplía el rango
         {
+            //Interactuable
             if (hit.collider.CompareTag(interactTag[0]) && !isDoingAnAction)
             {
                 currentInteractable = hit.collider.gameObject;
@@ -89,14 +90,14 @@ public class PlayerInteractions : MonoBehaviour
 
                 return;
             }
-
+            // Algo agarrable
             if(hit.collider.CompareTag(interactTag[1]) && !isDoingAnAction){
                 currentInteractable = hit.collider.gameObject;
                 interfaceText.text = "Press F to grab";
                 textInteractions.SetActive(true);
                 return;
             }
-            
+            //Colocar ingrediente en plato
             if (hit.collider.CompareTag(interactTag[2]) && isDoingAnAction)
             {
                 currentInteractable = hit.collider.gameObject;
@@ -108,7 +109,7 @@ public class PlayerInteractions : MonoBehaviour
                 textInteractions.SetActive(true);
                 return;
             }
-
+            // Interaccion en tabla de cortar
             if(hit.collider.CompareTag(interactTag[3])){
                 if(isDoingAnAction || hit.collider.gameObject.GetComponent<CuttingBoard>().ingredientOnBoard != null){
                     currentInteractable = hit.collider.gameObject;
@@ -132,7 +133,6 @@ public class PlayerInteractions : MonoBehaviour
             //Accion cuando es una caja de ingredientes
             if(currentInteractable.CompareTag(interactTag[0])){
                 if(isDoingAnAction) return;
-
                 var interactable = currentInteractable.GetComponent<IngredientSpawner>();
                 interactable?.SpawnIngredient();
             }
@@ -205,6 +205,8 @@ public class PlayerInteractions : MonoBehaviour
         Vector3 targetPosition = handPosition.transform.position;
         Quaternion targetRotation = handPosition.transform.rotation;
 
+        Vector3 originalScale = obj.transform.localScale; // Guardar la escala original
+
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
@@ -212,24 +214,29 @@ public class PlayerInteractions : MonoBehaviour
 
             obj.transform.position = Vector3.Lerp(startPosition, targetPosition, t);
             obj.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, t);
+        
+            // Asegurarse de que la escala no cambie
+            obj.transform.localScale = originalScale;
 
             yield return null;
         }
-        
+
+        // Asegurarse de que el objeto conserve la escala original después de moverlo
+        obj.transform.localScale = originalScale;
         Rigidbody rb = obj.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.isKinematic = true; // Desactiva física
+            rb.isKinematic = true; // Desactiva la física mientras se mueve
             rb.detectCollisions = false;
         }
 
         Collider col = obj.GetComponent<Collider>();
         if (col != null)
         {
-            col.enabled = false; // Evita colisiones molestas mientras se mueve
+            col.enabled = false; // Evita colisiones mientras se mueve
         }
 
-        // Al final del movimiento
+        // Final del movimiento
         obj.transform.SetParent(handPosition.transform);
         obj.transform.localPosition = Vector3.zero;
         obj.transform.localRotation = Quaternion.identity;
@@ -267,15 +274,16 @@ public class PlayerInteractions : MonoBehaviour
     {
         if (grabObject == null) return;
 
-        // Obtener el IngredientSO desde el objeto
+        // Obtener el IngredientInstance desde el objeto
         IngredientInstance ingredientInstance = grabObject.GetComponent<IngredientInstance>();
         if (ingredientInstance == null) return;
 
-        IngredientSO ingredientSO = ingredientInstance.ingredientData;
-
-        // Intentar añadirlo al plato
+        // Verificar el estado del ingrediente antes de agregarlo
+        Debug.Log("Intentando agregar: " + ingredientInstance.ingredientData.ingredientName + " Estado: " + ingredientInstance.currentState);
+        
+        // Intentar añadirlo al plato, pasando el estado actual
         PlateController plateController = plate.GetComponent<PlateController>();
-        if (plateController == null || !plateController.TryAddIngredient(ingredientSO))
+        if (plateController == null || !plateController.TryAddIngredient(ingredientInstance))
         {
             return;
         }

@@ -15,5 +15,4 @@ MonoBehaviour:
   ingredientName: Lettuce
   states:
   - stateName: Crudo
-    requiredStep: 0
-    meshPrefab: {fileID: 2523523229042352172, guid: c8ca67bf6e4a74548b8e3294aaa347d1, type: 3}
+    meshPrefab: {fileID: 1272553652318120735, guid: c8ca67bf6e4a74548b8e3294aaa347d1, type: 3}

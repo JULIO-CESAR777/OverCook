@@ -12,7 +12,7 @@ public class RecipeSO : ScriptableObject
 [System.Serializable]
 public class IngredientRequirement
 {
-    public IngredientSO ingredient;
-    public string requiredState; // Ej: "Cocido"
-    public int quantity;
+    public IngredientSO ingredient; // El ingrediente en sí
+    public string requiredState; // El nombre del estado requerido (por ejemplo, "Crudo", "Cortado", etc.)
+    public int quantity; // Cantidad del ingrediente necesario
 }

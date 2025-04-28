@@ -24,15 +24,17 @@ public class IngredientSpawner : MonoBehaviour
             return;
         }
 
-        //Instantiate(ingredient, spawnPoint.position, spawnPoint.rotation);
-        IngredientState state = ingredientSO.GetStateByStep(PreparationStep.None);
-        if (state != null && state.meshPrefab != null)
+        // Aquí se busca el estado y el prefab correspondiente basado en `stateName`
+        foreach (var state in ingredientSO.states)
         {
-            GameObject obj = Instantiate(state.meshPrefab, spawnPoint.position, spawnPoint.rotation);
-            IngredientInstance instance = obj.GetComponent<IngredientInstance>();
-            if (instance != null)
+            if (state != null && state.meshPrefab != null)
             {
-                instance.Setup(ingredientSO, state.stateName);
+                GameObject obj = Instantiate(state.meshPrefab, spawnPoint.position, spawnPoint.rotation);
+                IngredientInstance instance = obj.GetComponent<IngredientInstance>();
+                if (instance != null)
+                {
+                    instance.Setup(ingredientSO, state.stateName); // Asignar estado a la instancia
+                }
             }
         }
     }

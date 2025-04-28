@@ -6,7 +6,7 @@ public class CuttingBoard : MonoBehaviour
 
     public IngredientInstance ingredientOnBoard;
     public float progress;
-    private bool canPickUpAfterCut = false;
+    //private bool canPickUpAfterCut = false;
     public bool readyToCut = false;
 
     void Awake()
@@ -31,7 +31,6 @@ public class CuttingBoard : MonoBehaviour
 
         if (progress >= 100)
         {
-            Debug.Log("se termino de cortar");
             CompleteCut();
         }
     }
@@ -40,34 +39,45 @@ public class CuttingBoard : MonoBehaviour
     {
         if (ingredientOnBoard == null) return;
 
-        // 1. Guardar posición
-        Vector3 spawnPosition = ingredientOnBoard.transform.position + Vector3.up * 0.1f;
-        Quaternion spawnRotation = ingredientOnBoard.transform.rotation;
-
-        GameObject cutIngredient = null;
-
-        // 2. Spawnear nuevo objeto cortado
-        if (ingredientOnBoard.cutVersionPrefab != null)
+        // Cambiar el estado del ingrediente a "Cortado"
+        ingredientOnBoard.currentState = "Cortado";
+        
+        // Cambiar el MeshRenderer y MeshFilter para mostrar la versión cortada
+        MeshRenderer renderer = ingredientOnBoard.GetComponent<MeshRenderer>();
+        if (renderer != null && ingredientOnBoard.cutMesh != null)
         {
-            cutIngredient = Instantiate(ingredientOnBoard.cutVersionPrefab, spawnPosition, spawnRotation);
-
-            // Aplicar fuerza para que salte un poquito (opcional)
-            Rigidbody rb = cutIngredient.GetComponent<Rigidbody>();
-            if (rb != null)
+            // Aplicar la nueva malla (si está disponible)
+            MeshFilter filter = ingredientOnBoard.GetComponent<MeshFilter>();
+            if (filter != null)
             {
-                rb.AddForce(Vector3.up * 2f, ForceMode.Impulse);
+                filter.mesh = ingredientOnBoard.cutMesh[1];
             }
+            
         }
-        else
+        
+        ingredientOnBoard.transform.localScale = new Vector3(1.3f, 1.6f, 1.3f);
+        
+        MeshCollider collider = ingredientOnBoard.GetComponent<MeshCollider>();
+        if (collider != null && ingredientOnBoard.cutMesh != null)
         {
-            Debug.LogWarning("No hay prefab de versión cortada asignado al ingrediente.");
+            // Actualizar el MeshCollider
+            collider.sharedMesh = ingredientOnBoard.cutMesh[1];
+            collider.enabled = true;
         }
-
-         // 3. Destruir el ingrediente crudo original
-        Destroy(ingredientOnBoard.gameObject);
+        
+        ingredientOnBoard.transform.SetParent(null);
+        
+        
+        // Aplicar fuerza para que salte un poquito (opcional)
+        Rigidbody rb = ingredientOnBoard.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.isKinematic = false;
+            rb.detectCollisions = true;
+            rb.AddForce(Vector3.up * 2f, ForceMode.Impulse);
+        }
 
         // IMPORTANTE: Bloqueamos recoger temporalmente
-        canPickUpAfterCut = false;
         StartCoroutine(EnablePickupAfterDelay(ingredientOnBoard.gameObject, 0.5f)); // medio segundo
 
         // 4. Limpiar referencia
@@ -75,11 +85,7 @@ public class CuttingBoard : MonoBehaviour
         progress = 0;
         readyToCut = false;
 
-        // 5. Iniciar el delay para permitir agarrar
-        if (cutIngredient != null)
-        {
-            StartCoroutine(EnablePickupAfterDelay(cutIngredient, 0.5f)); // 0.5 segundos de espera
-        }
+        
     }
 
     private IEnumerator EnablePickupAfterDelay(GameObject ingredient, float delay)
@@ -90,7 +96,6 @@ public class CuttingBoard : MonoBehaviour
         IngredientInstance instance = ingredient.GetComponent<IngredientInstance>();
         if (instance != null)
         {
-            Debug.Log("ya lo puedes agarrar");
             instance.canBePickedUp = true; // O cualquier sistema que uses para permitir agarrar
         }
     }
