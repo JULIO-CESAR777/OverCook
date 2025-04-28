@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 3
   tags:
   - Anchor
+  - Interactable
+  - Ingredient
+  - Plate
   layers:
   - Default
   - TransparentFX
@@ -16,7 +19,7 @@ TagManager:
   - Grabbable
   - Hand
   - HandPlayer
-  - 
+  - Player
   - 
   - 
   - 
