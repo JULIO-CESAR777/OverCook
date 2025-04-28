@@ -85,6 +85,7 @@ public class PlateController : MonoBehaviour
             {
                 // Si la receta es válida, muestra un mensaje o retroalimentación
                 // Puedes hacer más acciones aquí, como reproducir un sonido o mostrar una UI
+                Debug.Log("sexo");
                 recipeCompleted = true;
             }
         }
