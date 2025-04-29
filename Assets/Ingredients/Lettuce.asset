@@ -16,4 +16,4 @@ MonoBehaviour:
   states:
   - stateName: Crudo
     requiredStep: 0
-    meshPrefab: {fileID: 7960385245354578914, guid: 541a42c6d4d17f7459c47ef2cc2949f3, type: 3}
+    meshPrefab: {fileID: 2523523229042352172, guid: c8ca67bf6e4a74548b8e3294aaa347d1, type: 3}

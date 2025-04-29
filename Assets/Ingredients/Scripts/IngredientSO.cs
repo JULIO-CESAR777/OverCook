@@ -24,7 +24,7 @@ public class IngredientState
 public class IngredientSO : ScriptableObject
 {
     public string ingredientName;
-    public List<IngredientState> states; // Ej: Crudo, Cortado, Cocido
+    public List<IngredientState> states;
 
     public IngredientState GetStateByStep(PreparationStep step)
     {
