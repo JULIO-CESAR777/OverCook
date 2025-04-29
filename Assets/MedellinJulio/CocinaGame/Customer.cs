@@ -6,6 +6,7 @@ public class Customer : MonoBehaviour
 {
     [Header("Movimiento")]
     public Transform targetPosition; // Punto donde se debe parar (en la barra)
+    public Transform exitPosition;
     public float moveSpeed = 2f;
 
     [Header("Pedido")]
@@ -102,6 +103,8 @@ public class Customer : MonoBehaviour
 
     private void LeaveRestaurant(bool happy)
     {
+        
+
         if (happy)
         {
             Debug.Log("El cliente se fue feliz.");
@@ -110,7 +113,19 @@ public class Customer : MonoBehaviour
         {
             Debug.Log("El cliente se fue molesto.");
         }
-
+        MoveToExit();
         Destroy(gameObject); // El cliente desaparece
+    }
+
+    private IEnumerator MoveToExit()
+    {
+        while (Vector3.Distance(transform.position, exitPosition.position) > 0.1f)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, exitPosition.position, moveSpeed * Time.deltaTime);
+            yield return null;
+        }
+
+        // Cuando llegue, muestra el pedido
+        ShowOrder();
     }
 }

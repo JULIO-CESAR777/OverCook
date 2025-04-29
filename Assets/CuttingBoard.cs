@@ -8,6 +8,7 @@ public class CuttingBoard : MonoBehaviour
     public float progress;
     //private bool canPickUpAfterCut = false;
     public bool readyToCut = false;
+    public Animator knifeAnimator;
 
     void Awake()
     {
@@ -17,15 +18,18 @@ public class CuttingBoard : MonoBehaviour
         if(ingredient.currentState == "Crudo"){
             ingredientOnBoard = ingredient;
             readyToCut = true;
+           
             return true;
+          
         }
         return false;
     }
 
     public void cutIngredient(){
-
-        if(!readyToCut) return;
+      
+        if (!readyToCut) return;
         if (ingredientOnBoard == null) return;
+       
         progress += 100f * Time.deltaTime;
  
 
@@ -33,6 +37,12 @@ public class CuttingBoard : MonoBehaviour
         {
             CompleteCut();
         }
+    }
+
+    public void AnimacionCortar()
+    {
+        knifeAnimator.SetTrigger("Cut");
+
     }
 
     private void CompleteCut()

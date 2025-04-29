@@ -1,128 +1,112 @@
-using System;
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
+
 public class PlateController : MonoBehaviour
 {
     public List<IngredientInstance> currentIngredients = new List<IngredientInstance>();
     public bool recipeCompleted;
+
+    [Header("Apilado de ingredientes")]
+    public Transform stackingPoint; // Punto donde empezar a apilar
+    public float stackHeight = 0.05f; // Altura entre ingredientes apilados
 
     private void Start()
     {
         recipeCompleted = false;
     }
 
-    // Modificamos TryAddIngredient para que acepte un ingrediente con estado diferente
     public bool TryAddIngredient(IngredientInstance ingredientInstance)
     {
-        // Si el plato está vacío, acepta cualquier ingrediente
-        if (currentIngredients.Count == 0)
-        {
-            currentIngredients.Add(ingredientInstance);
-            Debug.Log("Agregado primer ingrediente: " + ingredientInstance.ingredientData.ingredientName + " Estado: " + ingredientInstance.currentState);
-            CheckRecipeCompletion(); // Verificar si la receta está completa
-            return true;
-        }
+        if (ingredientInstance == null)
+            return false;
 
-        // Intentar formar una receta con los ingredientes actuales + el nuevo
-        List<IngredientInstance> tempIngredients = new List<IngredientInstance>(currentIngredients);
-        tempIngredients.Add(ingredientInstance);
+        // Instanciar visualmente el ingrediente sobre el plato
+        StackIngredient(ingredientInstance);
 
-        foreach (var recipe in GameManager.Instance.GetAllRecipes())
-        {
-            if (RecipeMatches(recipe, tempIngredients)) // Pasamos el estado del ingrediente
-            {
-                currentIngredients.Add(ingredientInstance);
-                Debug.Log("Ingrediente agregado correctamente: " + ingredientInstance.ingredientData.ingredientName + " Estado: " + ingredientInstance.currentState);
-                CheckRecipeCompletion(); // Verificar si la receta está completa
-                return true;
-            }
-        }
+        // Agregar el ingrediente al plato
+        currentIngredients.Add(ingredientInstance);
 
-        // Si ninguna receta es válida con este conjunto, no se acepta
-        return false;
+        // Verificar si al agregar este ingrediente, completamos una receta
+        CheckRecipeCompletion();
+
+        return true;
     }
 
-
-    
-    // Comparamos la receta con los ingredientes, incluyendo el estado
-    private bool RecipeMatches(RecipeSO recipe, List<IngredientInstance> ingredients)
+    private void StackIngredient(IngredientInstance ingredientInstance)
     {
-        List<IngredientRequirement> reqs = new List<IngredientRequirement>(recipe.ingredientsRequired);
+        // Acomoda el ingrediente como hijo del plato
+        ingredientInstance.transform.SetParent(stackingPoint);
 
-        foreach (var req in reqs)
-        {
-            Debug.Log("Requisito de receta: " + req.ingredient.ingredientName + " Estado requerido: " + req.requiredState);
-            int quantityFound = 0;
+        // Calcula la posición apilada
+        Vector3 newPosition = Vector3.up * (stackHeight * currentIngredients.Count);
+        ingredientInstance.transform.localPosition = newPosition;
 
-            // Iteramos sobre los ingredientes que tenemos en el plato (currentIngredients)
-            foreach (var ingredientInstance in ingredients)
-            {
-                // Comparamos el IngredientSO del plato con el IngredientSO de la receta
-                if (ingredientInstance.ingredientData == req.ingredient)
-                {
-                    // Comprobamos si el estado del ingrediente coincide con el estado requerido por la receta
-                    if (ingredientInstance.currentState == req.requiredState)
-                    {
-                        quantityFound++;
-                    }
-                    else
-                    {
-                        Debug.Log("El estado no coincide. Se esperaba: " + req.requiredState + ", pero se encontró: " + ingredientInstance.currentState);
-                    }
-                }
-            }
-
-            // Verificamos si la cantidad encontrada es suficiente
-            if (quantityFound < req.quantity)
-            {
-                Debug.Log("No hay suficientes ingredientes con el estado correcto. Requiere: " + req.quantity + " Encontrados: " + quantityFound);
-                return false; // No hay suficientes ingredientes con el estado correcto
-            }
-        }
-
-        return true; // Todos los ingredientes y estados están correctos
+        // Opcional: Resetear rotación si quieres que siempre estén derechos
+        ingredientInstance.transform.localRotation = Quaternion.identity;
     }
 
-    
-    // Comprobamos si la receta está completa, considerando el estado de los ingredientes
     public void CheckRecipeCompletion()
     {
         foreach (var recipe in GameManager.Instance.GetAllRecipes())
         {
-            bool recipeMatches = true;
-
-            foreach (var ingredientReq in recipe.ingredientsRequired)
-            {
-                bool foundIngredientWithCorrectState = false;
-
-                // Buscar si el plato tiene los ingredientes requeridos con el estado correcto
-                foreach (var currentIngredient in currentIngredients)
-                {
-                    if (currentIngredient.ingredientData == ingredientReq.ingredient)
-                    {
-                        if (currentIngredient.currentState == ingredientReq.requiredState)
-                        {
-                            foundIngredientWithCorrectState = true;
-                            break; // Encontramos el ingrediente con el estado correcto
-                        }
-                    }
-                }
-
-                if (!foundIngredientWithCorrectState)
-                {
-                    recipeMatches = false;
-                    break; // Si no encontramos el ingrediente con el estado correcto, salimos
-                }
-            }
-
-            if (recipeMatches)
+            if (RecipeMatches(recipe))
             {
                 Debug.Log("Receta completada: " + recipe.recipeName);
                 recipeCompleted = true;
-                return; // Si la receta está completada, no hace falta continuar revisando
+                return;
+            }
+        }
+        recipeCompleted = false;
+    }
+
+    private bool RecipeMatches(RecipeSO recipe)
+    {
+        List<IngredientRequirement> requirements = new List<IngredientRequirement>(recipe.ingredientsRequired);
+        List<IngredientInstance> availableIngredients = new List<IngredientInstance>(currentIngredients);
+
+        foreach (var requirement in requirements)
+        {
+            int requiredAmount = requirement.quantity;
+
+            for (int i = availableIngredients.Count - 1; i >= 0; i--)
+            {
+                var ing = availableIngredients[i];
+
+                if (ing.ingredientData == requirement.ingredient && ing.currentState == requirement.requiredState)
+                {
+                    requiredAmount--;
+                    availableIngredients.RemoveAt(i); // Usamos este ingrediente
+                    if (requiredAmount == 0)
+                        break;
+                }
+            }
+
+            if (requiredAmount > 0)
+            {
+                return false; // Faltan ingredientes de este tipo
             }
         }
 
-        recipeCompleted = false; // Si no se completó ninguna receta
+        return true; // Todos los requisitos cumplidos
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        IngredientInstance ingredient = other.GetComponent<IngredientInstance>();
+        if (ingredient != null)
+        {
+            Debug.Log("Ingrediente tocó el plato: " + ingredient.ingredientData.ingredientName);
+
+            // Intentar agregarlo automáticamente
+            if (TryAddIngredient(ingredient))
+            {
+                Debug.Log("Ingrediente agregado al plato exitosamente.");
+            }
+            else
+            {
+                Debug.Log("Ingrediente no compatible, no se agregó.");
+            }
+        }
+    }
+
 }

@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &302860857925984671
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7983949348768429987}
+  m_Layer: 0
+  m_Name: DroppingPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7983949348768429987
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 302860857925984671}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.336, z: -0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7339822300164521045}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8221953057220728006
 GameObject:
   m_ObjectHideFlags: 0
@@ -26,8 +57,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 3.87, y: 0, z: 24.17}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.75, y: 0.75, z: 0.75}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 2077708473442658907}
   - {fileID: 241628485677295878}
@@ -291,6 +322,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: cuttingboard
       objectReference: {fileID: 0}
+    - target: {fileID: 1489942688989137884, guid: 31aec8e20fe6b654199eeab747642d04, type: 3}
+      propertyPath: m_TagString
+      value: CuttingBoard
+      objectReference: {fileID: 0}
     - target: {fileID: 2411845775869159030, guid: 31aec8e20fe6b654199eeab747642d04, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.29299998
@@ -331,11 +366,72 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4968613469136188129, guid: 31aec8e20fe6b654199eeab747642d04, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.6310014
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 2411845775869159030, guid: 31aec8e20fe6b654199eeab747642d04, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7983949348768429987}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1489942688989137884, guid: 31aec8e20fe6b654199eeab747642d04, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7927486121211739548}
+    - targetCorrespondingSourceObject: {fileID: 4684010174779235240, guid: 31aec8e20fe6b654199eeab747642d04, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2884408835757065383}
   m_SourcePrefab: {fileID: 100100000, guid: 31aec8e20fe6b654199eeab747642d04, type: 3}
+--- !u!1 &406489336858984843 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4684010174779235240, guid: 31aec8e20fe6b654199eeab747642d04, type: 3}
+  m_PrefabInstance: {fileID: 4946308681672088099}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &2884408835757065383
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 406489336858984843}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 9abc2cd7d62d25e47a58f276acb16a97, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!1 &5767289718712406527 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1489942688989137884, guid: 31aec8e20fe6b654199eeab747642d04, type: 3}
+  m_PrefabInstance: {fileID: 4946308681672088099}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7927486121211739548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5767289718712406527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7d1f8f03e5def64282ca6cc1edba931, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ingredientOnBoard: {fileID: 0}
+  progress: 0
+  readyToCut: 0
+  knifeAnimator: {fileID: 2884408835757065383}
 --- !u!4 &7339822300164521045 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2411845775869159030, guid: 31aec8e20fe6b654199eeab747642d04, type: 3}

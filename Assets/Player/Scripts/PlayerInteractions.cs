@@ -68,6 +68,7 @@ public class PlayerInteractions : MonoBehaviour
             CuttingBoard cuttingBoard = currentInteractable.GetComponent<CuttingBoard>();
             if (cuttingBoard != null && cuttingBoard.ingredientOnBoard != null)
             {
+                cuttingBoard.AnimacionCortar();
                 cuttingBoard.cutIngredient();
             }
         }
