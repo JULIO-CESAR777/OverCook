@@ -29,16 +29,12 @@ public class PlayerInteractions : MonoBehaviour
     private void OnEnable()
     {
         interactAction.action.performed += OnInteract;
-       //agregue este de abajo yo juulio
-       
         interactAction.action.Enable();
     }
 
     private void OnDisable()
     {
         interactAction.action.performed -= OnInteract;
-        //agregue esto julio uwuwuw
-       
         interactAction.action.Disable();
     }
 
@@ -72,13 +68,9 @@ public class PlayerInteractions : MonoBehaviour
             CuttingBoard cuttingBoard = currentInteractable.GetComponent<CuttingBoard>();
             if (cuttingBoard != null && cuttingBoard.ingredientOnBoard != null)
             {
-
-               
-                cuttingBoard.cutIngredient();
+                cuttingBoard.cutIngredient(this);
             }
         }
-        
-     
     }
 
     private void HandleInteractionRaycast()
@@ -147,7 +139,6 @@ public class PlayerInteractions : MonoBehaviour
             
             //Accion cuando es un ingrediente
             if(currentInteractable.CompareTag(interactTag[1])){
-                isDoingAnAction = true;
                 //Grab Ingredient
                 grabbingObject(currentInteractable);
                 currentInteractable = null;
@@ -169,11 +160,7 @@ public class PlayerInteractions : MonoBehaviour
                     // Si estamos agarrando algo Y no hay ingrediente en la tabla → colocar ingrediente
                     PlaceIngredientOnCuttingBoard(currentInteractable);
                 }
-                else if (cuttingBoard != null && cuttingBoard.readyToCut)
-                {
-                    cuttingBoard.AnimacionCortar();
-                   
-                }
+                
             }
             
         }
@@ -188,7 +175,6 @@ public class PlayerInteractions : MonoBehaviour
     
     public void grabbingObject(GameObject grabbedObject)
     {
-        
         if (grabObject != null) return; // Ya tienes algo agarrado
 
         IngredientInstance ingredient = grabbedObject.GetComponent<IngredientInstance>();
@@ -197,13 +183,15 @@ public class PlayerInteractions : MonoBehaviour
             // Todavía no se puede recoger
             return;
         }
-
+        
         StartCoroutine(MoveToHand(grabbedObject));
         
     }
 
     private IEnumerator MoveToHand(GameObject obj)
     {
+
+        isDoingAnAction = true;
         float duration = 0.25f; // Tiempo de la animación
         float elapsed = 0f;
 
@@ -256,6 +244,7 @@ public class PlayerInteractions : MonoBehaviour
     {
         if (grabObject == null) return;
 
+        isDoingAnAction = false;
         grabObject.transform.SetParent(null); // Lo separa de la mano
 
         Rigidbody rb = grabObject.GetComponent<Rigidbody>();
@@ -275,7 +264,7 @@ public class PlayerInteractions : MonoBehaviour
         }
 
         grabObject = null;
-        isDoingAnAction = false;
+        
     }
 
     private void PlaceIngredientOnPlate(GameObject plate)
@@ -357,12 +346,7 @@ public class PlayerInteractions : MonoBehaviour
         // Restablecer el estado de la acción después de colocar el ingrediente en el plato
         isDoingAnAction = false;
          
-
-
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////// LO MIO JULIO UWUWUWUWUW
-    ///
-    
-  
+
 }
