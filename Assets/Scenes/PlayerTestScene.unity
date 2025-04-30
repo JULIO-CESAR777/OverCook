@@ -292,10 +292,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5603061315233905727, guid: 0221bfad0a2f7fc4dbf949a7f709d080, type: 3}
-      propertyPath: ingredientSO
-      value: 
-      objectReference: {fileID: 11400000, guid: 9c629d6d89b8eaf49a44143bc36ff0bb, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -691,6 +687,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentIngredients: []
   recipeCompleted: 0
+  stackingPoint: {fileID: 0}
+  stackHeight: 0.05
 --- !u!1 &1230016420
 GameObject:
   m_ObjectHideFlags: 0
@@ -1392,10 +1390,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5603061315233905727, guid: 0221bfad0a2f7fc4dbf949a7f709d080, type: 3}
-      propertyPath: ingredientSO
-      value: 
-      objectReference: {fileID: 11400000, guid: 544b7a5c796ecbb4a8b8193680383aa8, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

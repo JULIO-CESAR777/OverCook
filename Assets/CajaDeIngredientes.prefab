@@ -123,7 +123,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d22985cdc1a0545448b70edf152c7d12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ingredientSO: {fileID: 11400000, guid: 544b7a5c796ecbb4a8b8193680383aa8, type: 2}
+  ingredientSO: {fileID: 11400000, guid: 9c629d6d89b8eaf49a44143bc36ff0bb, type: 2}
   topOfTheBox: {fileID: 0}
   spawnPoint: {fileID: 3862838438704964911}
 --- !u!1 &2641581604806760588

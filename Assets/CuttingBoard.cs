@@ -8,6 +8,7 @@ public class CuttingBoard : MonoBehaviour
     public float progress;
     public bool readyToCut = false;
 
+    public Animator knifeAnimator;
     void Awake()
     {
         progress = 0;
@@ -100,6 +101,13 @@ public class CuttingBoard : MonoBehaviour
         {
             instance.canBePickedUp = true; // O cualquier sistema que uses para permitir agarrar
         }
+    }
+
+    public void AnimacionCortar()
+    {
+        knifeAnimator.SetTrigger("Cut");
+
+
     }
 
 }
