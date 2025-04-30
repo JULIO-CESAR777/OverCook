@@ -104,7 +104,8 @@ MonoBehaviour:
   ingredientData: {fileID: 11400000, guid: 9c629d6d89b8eaf49a44143bc36ff0bb, type: 2}
   currentState: Crudo
   canBePickedUp: 1
-  cutMesh: []
+  cutMesh: {fileID: 5897541620420230933, guid: 8dcdcab5bf15c5c47863e422a275714f, type: 3}
+  cookMesh: {fileID: 0}
 --- !u!54 &1027565186803986907
 Rigidbody:
   m_ObjectHideFlags: 0
