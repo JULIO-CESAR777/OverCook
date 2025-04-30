@@ -1,14 +1,35 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
+public class IngredientNameRequirement
+{
+    public string ingredientName;
+    public int quantity = 1;
+}
+
+[System.Serializable]
+public class SimpleRecipe
+{
+    public string recipeName;
+    public List<IngredientNameRequirement> requiredIngredients;
+    public GameObject resultPrefab;
+}
+
 public class PlateController : MonoBehaviour
 {
     public List<IngredientInstance> currentIngredients = new List<IngredientInstance>();
     public bool recipeCompleted;
 
     [Header("Apilado de ingredientes")]
-    public Transform stackingPoint; // Punto donde empezar a apilar
-    public float stackHeight = 0.05f; // Altura entre ingredientes apilados
+    public Transform stackingPoint;
+    public float stackHeight = 0.05f;
+
+    [Header("Punto de aparición del resultado especial")]
+    public Transform spawnPoint;
+
+    [Header("Recetas disponibles")]
+    public List<SimpleRecipe> possibleRecipes;
 
     private void Start()
     {
@@ -20,13 +41,8 @@ public class PlateController : MonoBehaviour
         if (ingredientInstance == null)
             return false;
 
-        // Instanciar visualmente el ingrediente sobre el plato
         StackIngredient(ingredientInstance);
-
-        // Agregar el ingrediente al plato
         currentIngredients.Add(ingredientInstance);
-
-        // Verificar si al agregar este ingrediente, completamos una receta
         CheckRecipeCompletion();
 
         return true;
@@ -34,60 +50,87 @@ public class PlateController : MonoBehaviour
 
     private void StackIngredient(IngredientInstance ingredientInstance)
     {
-        // Acomoda el ingrediente como hijo del plato
         ingredientInstance.transform.SetParent(stackingPoint);
-
-        // Calcula la posición apilada
-        Vector3 newPosition = Vector3.up * (stackHeight * currentIngredients.Count);
+        Vector3 newPosition = Vector3.up * (stackHeight * stackingPoint.childCount);
         ingredientInstance.transform.localPosition = newPosition;
-
-        // Opcional: Resetear rotación si quieres que siempre estén derechos
         ingredientInstance.transform.localRotation = Quaternion.identity;
+
+        Rigidbody rb = ingredientInstance.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.isKinematic = true;
+            rb.useGravity = false;
+        }
+
+        Collider col = ingredientInstance.GetComponent<Collider>();
+        if (col != null)
+        {
+            col.enabled = false;
+        }
     }
 
     public void CheckRecipeCompletion()
     {
-        foreach (var recipe in GameManager.Instance.GetAllRecipes())
+        foreach (var recipe in possibleRecipes)
         {
             if (RecipeMatches(recipe))
             {
-                Debug.Log("Receta completada: " + recipe.recipeName);
                 recipeCompleted = true;
+
+                if (recipe.resultPrefab != null && spawnPoint != null)
+                {
+                    Instantiate(recipe.resultPrefab, spawnPoint.position, Quaternion.identity);
+                    Debug.Log($"✅ Receta completada: {recipe.recipeName}");
+                }
+
+                RemoveUsedIngredients(recipe);
                 return;
             }
         }
+
         recipeCompleted = false;
     }
 
-    private bool RecipeMatches(RecipeSO recipe)
+    private bool RecipeMatches(SimpleRecipe recipe)
     {
-        List<IngredientRequirement> requirements = new List<IngredientRequirement>(recipe.ingredientsRequired);
-        List<IngredientInstance> availableIngredients = new List<IngredientInstance>(currentIngredients);
-
-        foreach (var requirement in requirements)
+        foreach (var requirement in recipe.requiredIngredients)
         {
-            int requiredAmount = requirement.quantity;
-
-            for (int i = availableIngredients.Count - 1; i >= 0; i--)
+            int count = 0;
+            foreach (var ing in currentIngredients)
             {
-                var ing = availableIngredients[i];
-
-                if (ing.ingredientData == requirement.ingredient && ing.currentState == requirement.requiredState)
-                {
-                    requiredAmount--;
-                    availableIngredients.RemoveAt(i); // Usamos este ingrediente
-                    if (requiredAmount == 0)
-                        break;
-                }
+                if (ing.ingredientData.ingredientName == requirement.ingredientName)
+                    count++;
             }
 
-            if (requiredAmount > 0)
+            if (count < requirement.quantity)
+                return false;
+        }
+
+        return true;
+    }
+
+    private void RemoveUsedIngredients(SimpleRecipe recipe)
+    {
+        List<IngredientInstance> toRemove = new List<IngredientInstance>();
+
+        foreach (var requirement in recipe.requiredIngredients)
+        {
+            int needed = requirement.quantity;
+            foreach (var ing in currentIngredients)
             {
-                return false; // Faltan ingredientes de este tipo
+                if (needed > 0 && ing.ingredientData.ingredientName == requirement.ingredientName)
+                {
+                    toRemove.Add(ing);
+                    needed--;
+                }
             }
         }
 
-        return true; // Todos los requisitos cumplidos
+        foreach (var ing in toRemove)
+        {
+            currentIngredients.Remove(ing);
+            Destroy(ing.gameObject);
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -97,7 +140,6 @@ public class PlateController : MonoBehaviour
         {
             Debug.Log("Ingrediente tocó el plato: " + ingredient.ingredientData.ingredientName);
 
-            // Intentar agregarlo automáticamente
             if (TryAddIngredient(ingredient))
             {
                 Debug.Log("Ingrediente agregado al plato exitosamente.");
@@ -108,5 +150,4 @@ public class PlateController : MonoBehaviour
             }
         }
     }
-
 }

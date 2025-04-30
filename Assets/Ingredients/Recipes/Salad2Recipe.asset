@@ -21,3 +21,5 @@ MonoBehaviour:
   - ingredient: {fileID: 11400000, guid: 544b7a5c796ecbb4a8b8193680383aa8, type: 2}
     requiredState: Crudo
     quantity: 2
+  isSpecialCombination: 0
+  specialResultPrefab: {fileID: 5558201821580814209, guid: 3112c314905039640832b1f06e64ea98, type: 3}

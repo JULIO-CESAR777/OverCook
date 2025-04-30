@@ -27,10 +27,11 @@ public class CuttingBoard : MonoBehaviour
         if(!readyToCut) return;
         if (ingredientOnBoard == null) return;
         progress += 100f * Time.deltaTime;
- 
 
+        AnimacionCortar();
         if (progress >= 100)
         {
+            
             CompleteCut(interactions);
         }
     }
