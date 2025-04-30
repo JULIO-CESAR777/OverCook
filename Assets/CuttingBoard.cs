@@ -6,7 +6,6 @@ public class CuttingBoard : MonoBehaviour
 
     public IngredientInstance ingredientOnBoard;
     public float progress;
-    //private bool canPickUpAfterCut = false;
     public bool readyToCut = false;
 
     void Awake()
@@ -22,7 +21,7 @@ public class CuttingBoard : MonoBehaviour
         return false;
     }
 
-    public void cutIngredient(){
+    public void cutIngredient(PlayerInteractions interactions){
 
         if(!readyToCut) return;
         if (ingredientOnBoard == null) return;
@@ -31,11 +30,11 @@ public class CuttingBoard : MonoBehaviour
 
         if (progress >= 100)
         {
-            CompleteCut();
+            CompleteCut(interactions);
         }
     }
 
-    private void CompleteCut()
+    private void CompleteCut(PlayerInteractions interactions)
     {
         if (ingredientOnBoard == null) return;
 
@@ -50,7 +49,7 @@ public class CuttingBoard : MonoBehaviour
             MeshFilter filter = ingredientOnBoard.GetComponent<MeshFilter>();
             if (filter != null)
             {
-                filter.mesh = ingredientOnBoard.cutMesh[1];
+                filter.mesh = ingredientOnBoard.cutMesh;
             }
             
         }
@@ -61,8 +60,9 @@ public class CuttingBoard : MonoBehaviour
         if (collider != null && ingredientOnBoard.cutMesh != null)
         {
             // Actualizar el MeshCollider
-            collider.sharedMesh = ingredientOnBoard.cutMesh[1];
+            collider.sharedMesh = ingredientOnBoard.cutMesh;
             collider.enabled = true;
+            collider.providesContacts = true;
         }
         
         ingredientOnBoard.transform.SetParent(null);
@@ -78,12 +78,14 @@ public class CuttingBoard : MonoBehaviour
         }
 
         // IMPORTANTE: Bloqueamos recoger temporalmente
-        StartCoroutine(EnablePickupAfterDelay(ingredientOnBoard.gameObject, 0.5f)); // medio segundo
+        StartCoroutine(EnablePickupAfterDelay(ingredientOnBoard.gameObject, 1f)); // medio segundo
 
         // 4. Limpiar referencia
         ingredientOnBoard = null;
         progress = 0;
         readyToCut = false;
+        interactions.isDoingAnAction = false;
+        Debug.Log("Se cambio la accion en la tabla");
 
         
     }

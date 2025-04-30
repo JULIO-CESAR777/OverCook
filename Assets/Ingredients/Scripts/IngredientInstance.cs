@@ -8,7 +8,10 @@ public class IngredientInstance : MonoBehaviour
     public bool canBePickedUp = true;
 
     [Header("Corte")]
-    public List<Mesh> cutMesh;
+    public Mesh cutMesh;
+
+    [Header("Cocinado")]
+    public Mesh cookMesh;
     //public List<MeshCollider> meshCollider;
 
     public void Setup(IngredientSO data, string state)
