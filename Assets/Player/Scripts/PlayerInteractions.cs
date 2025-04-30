@@ -29,12 +29,16 @@ public class PlayerInteractions : MonoBehaviour
     private void OnEnable()
     {
         interactAction.action.performed += OnInteract;
+       //agregue este de abajo yo juulio
+       
         interactAction.action.Enable();
     }
 
     private void OnDisable()
     {
         interactAction.action.performed -= OnInteract;
+        //agregue esto julio uwuwuw
+       
         interactAction.action.Disable();
     }
 
@@ -68,10 +72,13 @@ public class PlayerInteractions : MonoBehaviour
             CuttingBoard cuttingBoard = currentInteractable.GetComponent<CuttingBoard>();
             if (cuttingBoard != null && cuttingBoard.ingredientOnBoard != null)
             {
-                cuttingBoard.AnimacionCortar();
+
+               
                 cuttingBoard.cutIngredient();
             }
         }
+        
+     
     }
 
     private void HandleInteractionRaycast()
@@ -164,8 +171,8 @@ public class PlayerInteractions : MonoBehaviour
                 }
                 else if (cuttingBoard != null && cuttingBoard.readyToCut)
                 {
-                    // Si ya hay un ingrediente colocado y está listo para cortar → cortar
-                    cuttingBoard.cutIngredient();
+                    cuttingBoard.AnimacionCortar();
+                   
                 }
             }
             
@@ -350,7 +357,12 @@ public class PlayerInteractions : MonoBehaviour
         // Restablecer el estado de la acción después de colocar el ingrediente en el plato
         isDoingAnAction = false;
          
+
+
     }
 
-
+    ///////////////////////////////////////////////////////////////////////////////////////////// LO MIO JULIO UWUWUWUWUW
+    ///
+    
+  
 }

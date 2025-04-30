@@ -8,6 +8,7 @@ public class Customer : MonoBehaviour
     public Transform targetPosition; // Punto donde se debe parar (en la barra)
     public Transform exitPosition;
     public float moveSpeed = 2f;
+    public float moveSpeedExit = 0.5f;
 
     [Header("Pedido")]
     private RecipeSO selectedRecipe;
@@ -113,19 +114,34 @@ public class Customer : MonoBehaviour
         {
             Debug.Log("El cliente se fue molesto.");
         }
-        MoveToExit();
-        Destroy(gameObject); // El cliente desaparece
+        StartCoroutine(MoveToExit());
+        
     }
 
-    private IEnumerator MoveToExit()
-    {
+     private IEnumerator MoveToExit()
+     {
+        Vector3 direction = (exitPosition.position - transform.position).normalized;
+        direction.y = 0f;
+
+        Quaternion targetRotation = Quaternion.LookRotation(direction);
+        float rotationSpeed = 5f; // Puedes ajustar la velocidad del giro
+
+        while (Quaternion.Angle(transform.rotation, targetRotation) > 0.1f)
+        {
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                yield return null;
+        }
+        
         while (Vector3.Distance(transform.position, exitPosition.position) > 0.1f)
         {
-            transform.position = Vector3.MoveTowards(transform.position, exitPosition.position, moveSpeed * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, exitPosition.position, moveSpeedExit * Time.deltaTime);
             yield return null;
         }
 
-        // Cuando llegue, muestra el pedido
-        ShowOrder();
-    }
+        // Cliente llegó a la salida
+        Debug.Log("El cliente ha salido del restaurante.");
+    
+        Destroy(gameObject); // Destruye al cliente
+     }
+
 }

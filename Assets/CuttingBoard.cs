@@ -26,12 +26,12 @@ public class CuttingBoard : MonoBehaviour
     }
 
     public void cutIngredient(){
-      
+        
         if (!readyToCut) return;
         if (ingredientOnBoard == null) return;
        
         progress += 100f * Time.deltaTime;
- 
+      
 
         if (progress >= 100)
         {
