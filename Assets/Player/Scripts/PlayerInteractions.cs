@@ -92,7 +92,7 @@ public class PlayerInteractions : MonoBehaviour
                 return;
             }
             // Algo agarrable
-            if(hit.collider.CompareTag(interactTag[1]) && !isDoingAnAction){
+            if((hit.collider.CompareTag(interactTag[1]) || hit.collider.CompareTag(interactTag[4]))&& !isDoingAnAction){
                 currentInteractable = hit.collider.gameObject;
                 interfaceText.text = "Press F to grab";
                 textInteractions.SetActive(true);
@@ -120,6 +120,16 @@ public class PlayerInteractions : MonoBehaviour
                 }
             }
 
+            if (hit.collider.CompareTag(interactTag[5]) && isDoingAnAction && grabObject.CompareTag("Recipe"))
+            {
+                currentInteractable = hit.collider.gameObject;
+                interfaceText.text = "Press F to give";
+                textInteractions.SetActive(true);
+                return;
+
+            }
+
+
         }
 
         currentInteractable = null;
@@ -139,7 +149,8 @@ public class PlayerInteractions : MonoBehaviour
             }
             
             //Accion cuando es un ingrediente
-            if(currentInteractable.CompareTag(interactTag[1])){
+            if(currentInteractable.CompareTag(interactTag[1]) && !isDoingAnAction)
+            {
                 //Grab Ingredient
                 grabbingObject(currentInteractable);
                 currentInteractable = null;
@@ -163,7 +174,23 @@ public class PlayerInteractions : MonoBehaviour
                 }
                 
             }
-            
+
+            if(currentInteractable != null && currentInteractable.CompareTag(interactTag[4]) && !isDoingAnAction)
+            {
+
+                grabbingPlate(currentInteractable);
+                currentInteractable = null;
+            }
+
+            if(currentInteractable != null && currentInteractable.CompareTag(interactTag[5]) && grabObject.CompareTag("Recipe") && isDoingAnAction)
+            {
+                giveOrder();
+                currentInteractable = null;
+
+
+            }
+
+
         }
         //Comprobacion cuando se quiere soltar un objeto
         else if(currentInteractable == null && isDoingAnAction )
@@ -185,10 +212,24 @@ public class PlayerInteractions : MonoBehaviour
             return;
         }
         
+
         StartCoroutine(MoveToHand(grabbedObject));
         
     }
 
+    public void grabbingPlate(GameObject grabbedObject)
+    {
+        if (grabObject != null) return;
+        PlateController plate = grabbedObject.GetComponent<PlateController>();
+        if(plate != null && !plate.recipeCompleted)
+        {
+
+            return;
+        }
+
+        StartCoroutine(MoveToHand(grabbedObject));
+
+    }
     private IEnumerator MoveToHand(GameObject obj)
     {
 
@@ -347,6 +388,40 @@ public class PlayerInteractions : MonoBehaviour
         // Restablecer el estado de la acción después de colocar el ingrediente en el plato
         isDoingAnAction = false;
          
+    }
+
+    //Julio
+
+    public void giveOrder()
+    {
+        if (grabObject == null && currentInteractable == null) return;
+
+        bool flag;
+
+        
+
+        Customer cliente = currentInteractable.GetComponent<Customer>();
+
+        flag = cliente.ServeOrder(grabObject);
+
+        if (flag)
+        {
+
+            grabObject.transform.SetParent(null);
+            Destroy(grabObject.gameObject);
+            grabObject = null;
+           
+            isDoingAnAction = false;
+          
+            Debug.Log("Borrado objetos");
+            
+        }
+     
+
+        
+
+        
+
     }
 
 

@@ -46,16 +46,18 @@ public class Customer : MonoBehaviour
     private void ChooseRandomRecipe()
     {
         var allRecipes = GameManager.Instance.GetAllRecipes();
+        //testing
+        selectedRecipe = GameManager.Instance.allRecipes[0];
         if (allRecipes.Count == 0)
         {
             Debug.LogWarning("No hay recetas disponibles para elegir.");
             return;
         }
 
-        int randomIndex = Random.Range(0, allRecipes.Count);
-        selectedRecipe = allRecipes[randomIndex];
+        //int randomIndex = Random.Range(0, allRecipes.Count);
+        //selectedRecipe = allRecipes[randomIndex];
 
-        Debug.Log("El cliente ha pedido: " + selectedRecipe.recipeName);
+        //Debug.Log("El cliente ha pedido: " + selectedRecipe.recipeName);
     }
 
     private IEnumerator MoveToBar()
@@ -87,32 +89,35 @@ public class Customer : MonoBehaviour
         }
     }
 
-    public void ServeOrder(RecipeSO servedRecipe)
-    {
-        if (servedRecipe == selectedRecipe)
+    public bool ServeOrder(GameObject servedRecipe)
+    { 
+        if(servedRecipe.gameObject.name == selectedRecipe.recipeName)
         {
             Debug.Log("¡Pedido correcto!");
             isServed = true;
             LeaveRestaurant(true);
+
+            return true;
+
         }
-        else
-        {
-            Debug.Log("Pedido incorrecto.");
-            // Puedes decidir penalizar aquí
-        }
+        
+
+
+        return false;
     }
 
     private void LeaveRestaurant(bool happy)
     {
-        
+
+        Debug.Log("Me llamaron para salir, estoy::" + happy);
 
         if (happy)
         {
-            Debug.Log("El cliente se fue feliz.");
+            //Debug.Log("El cliente se fue feliz.");
         }
         else
         {
-            Debug.Log("El cliente se fue molesto.");
+            //Debug.Log("El cliente se fue molesto.");
         }
         StartCoroutine(MoveToExit());
         
@@ -120,6 +125,8 @@ public class Customer : MonoBehaviour
 
      private IEnumerator MoveToExit()
      {
+
+        Debug.Log("Iniciando salida");
         Vector3 direction = (exitPosition.position - transform.position).normalized;
         direction.y = 0f;
 
@@ -139,7 +146,7 @@ public class Customer : MonoBehaviour
         }
 
         // Cliente llegó a la salida
-        Debug.Log("El cliente ha salido del restaurante.");
+        //Debug.Log("El cliente ha salido del restaurante.");
     
         Destroy(gameObject); // Destruye al cliente
      }

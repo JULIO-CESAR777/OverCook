@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -55,18 +56,9 @@ public class PlateController : MonoBehaviour
         ingredientInstance.transform.localPosition = newPosition;
         ingredientInstance.transform.localRotation = Quaternion.identity;
 
-        Rigidbody rb = ingredientInstance.GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            rb.isKinematic = true;
-            rb.useGravity = false;
-        }
+      
+       
 
-        Collider col = ingredientInstance.GetComponent<Collider>();
-        if (col != null)
-        {
-            col.enabled = false;
-        }
     }
 
     public void CheckRecipeCompletion()
@@ -76,14 +68,18 @@ public class PlateController : MonoBehaviour
             if (RecipeMatches(recipe))
             {
                 recipeCompleted = true;
-
-                if (recipe.resultPrefab != null && spawnPoint != null)
+                
+                if (recipe.resultPrefab != null && stackingPoint != null)
                 {
-                    Instantiate(recipe.resultPrefab, spawnPoint.position, Quaternion.identity);
+                    Vector3 spawnPosition = stackingPoint.position + Vector3.up * 0.5f; // Aumenta 0.3 en Y
+                    GameObject result= Instantiate(recipe.resultPrefab, stackingPoint.position, Quaternion.identity);
+                    result.name = recipe.resultPrefab.name;
                     Debug.Log($"✅ Receta completada: {recipe.recipeName}");
+                    gameObject.GetComponent<Rigidbody>().useGravity=true;
                 }
 
-                RemoveUsedIngredients(recipe);
+                ResetPlate();
+                Destroy(gameObject);
                 return;
             }
         }
@@ -149,5 +145,18 @@ public class PlateController : MonoBehaviour
                 Debug.Log("Ingrediente no compatible, no se agregó.");
             }
         }
+    }
+
+    // YO JULIOOOO
+
+    private void ResetPlate()
+    {
+        foreach (var ing in currentIngredients)
+        {
+            Destroy(ing.gameObject);
+        }
+
+        currentIngredients.Clear();
+        recipeCompleted = false;
     }
 }
