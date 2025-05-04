@@ -92,7 +92,7 @@ public class PlayerInteractions : MonoBehaviour
                 return;
             }
             // Algo agarrable
-            if((hit.collider.CompareTag(interactTag[1]) || hit.collider.CompareTag(interactTag[4]))&& !isDoingAnAction){
+            if((hit.collider.CompareTag(interactTag[1]) || hit.collider.CompareTag(interactTag[4]) || hit.collider.CompareTag(interactTag[2])) && !isDoingAnAction){
                 currentInteractable = hit.collider.gameObject;
                 interfaceText.text = "Press F to grab";
                 textInteractions.SetActive(true);
@@ -155,7 +155,15 @@ public class PlayerInteractions : MonoBehaviour
                 grabbingObject(currentInteractable);
                 currentInteractable = null;
             }
-            
+
+            //Accion cuando es un plato JULIOOOO
+            if (currentInteractable.CompareTag(interactTag[2]) && !isDoingAnAction)
+            {
+                //Grab Ingredient
+                grabbingPlate(currentInteractable);
+                currentInteractable = null;
+            }
+
             // Acción cuando es un plato y el jugador tiene un ingrediente en mano
             if (currentInteractable!=null && currentInteractable.CompareTag(interactTag[2]) && isDoingAnAction)
             {
@@ -220,12 +228,7 @@ public class PlayerInteractions : MonoBehaviour
     public void grabbingPlate(GameObject grabbedObject)
     {
         if (grabObject != null) return;
-        PlateController plate = grabbedObject.GetComponent<PlateController>();
-        if(plate != null && !plate.recipeCompleted)
-        {
-
-            return;
-        }
+       
 
         StartCoroutine(MoveToHand(grabbedObject));
 

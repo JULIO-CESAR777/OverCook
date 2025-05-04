@@ -1,79 +1,109 @@
 using UnityEngine;
-using TMPro; // Para mostrar el nombre del pedido
+using TMPro;
+using UnityEngine.UI;
 using System.Collections;
 
 public class Customer : MonoBehaviour
 {
     [Header("Movimiento")]
-    public Transform targetPosition; // Punto donde se debe parar (en la barra)
-    public Transform exitPosition;
     public float moveSpeed = 2f;
     public float moveSpeedExit = 0.5f;
+    public Transform exitPosition;
 
     [Header("Pedido")]
     private RecipeSO selectedRecipe;
-    public GameObject speechBubblePrefab; // Prefab para mostrar el pedido
+    public GameObject speechBubblePrefab;
     private GameObject currentSpeechBubble;
+   
 
     [Header("Paciencia")]
-    public float patienceTime = 10f; // Segundos que el cliente espera
+    public float patienceTime = 10f;
     private float currentPatience;
-
     private bool isServed = false;
+    private bool esperanding;
+
+    [Header("Puntos")]
+    public int pointsForOrder = 100;
+    public GameObject floatingPointsPrefab;
+
+    [Header("UI de Paciencia")]
+    public GameObject patienceSliderPrefab;
+    private Slider patienceSlider;
+
+    // Referencia al spawner
+    private CustomerSpawner spawner;
+    private int queueIndex;
 
     private void Start()
     {
         ChooseRandomRecipe();
         currentPatience = patienceTime;
 
-        // Empieza el movimiento hacia la barra
-        StartCoroutine(MoveToBar());
+        GameObject exit = GameObject.Find("ExitCustomer");
+        if (exit != null)
+        {
+            exitPosition = exit.transform;
+        }
+        else
+        {
+            Debug.LogWarning("No se encontró el objeto 'ExitCustomer' en la escena.");
+        }
+        // Instanciar slider de paciencia
+        if (patienceSliderPrefab != null)
+        {
+            GameObject sliderGO = Instantiate(patienceSliderPrefab, transform.position + new Vector3(0, 3f, 0), Quaternion.identity, transform);
+            sliderGO.transform.SetParent(transform); // Sigue al cliente
+            patienceSlider = sliderGO.GetComponentInChildren<Slider>();
+
+            if (patienceSlider != null)
+            {
+                patienceSlider.maxValue = patienceTime;
+                patienceSlider.value = currentPatience;
+            }
+        }
     }
 
     private void Update()
     {
-        if (!isServed)
+        if(esperanding)
         {
-            currentPatience -= Time.deltaTime;
-
-            if (currentPatience <= 0)
+            if (!isServed)
             {
-                LeaveRestaurant(false); // Se fue enojado
+                currentPatience -= Time.deltaTime;
+
+                if (patienceSlider != null)
+                {
+                    patienceSlider.value = currentPatience;
+                }
+
+                if (currentPatience <= 0)
+                {
+                    StartCoroutine(MoveToExit()); // Se fue molesto
+                }
             }
+
         }
+      
     }
 
     private void ChooseRandomRecipe()
     {
         var allRecipes = GameManager.Instance.GetAllRecipes();
-        //testing
-        selectedRecipe = GameManager.Instance.allRecipes[0];
+
         if (allRecipes.Count == 0)
         {
-            Debug.LogWarning("No hay recetas disponibles para elegir.");
+            Debug.LogWarning("No hay recetas disponibles.");
             return;
         }
 
-        //int randomIndex = Random.Range(0, allRecipes.Count);
-        //selectedRecipe = allRecipes[randomIndex];
-
-        //Debug.Log("El cliente ha pedido: " + selectedRecipe.recipeName);
-    }
-
-    private IEnumerator MoveToBar()
-    {
-        while (Vector3.Distance(transform.position, targetPosition.position) > 0.1f)
-        {
-            transform.position = Vector3.MoveTowards(transform.position, targetPosition.position, moveSpeed * Time.deltaTime);
-            yield return null;
-        }
-
-        // Cuando llegue, muestra el pedido
-        ShowOrder();
+        // Seleccionar una receta al azar (puedes ajustar esto)
+        selectedRecipe = allRecipes[Random.Range(0, allRecipes.Count)];
     }
 
     private void ShowOrder()
     {
+
+        esperanding = true;
         if (speechBubblePrefab != null)
         {
             currentSpeechBubble = Instantiate(speechBubblePrefab, transform.position + new Vector3(0, 4f, 0), Quaternion.identity, transform);
@@ -85,70 +115,92 @@ public class Customer : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("No asignaste un prefab de speech bubble.");
+            Debug.LogWarning("No hay prefab de burbuja asignado.");
         }
     }
 
     public bool ServeOrder(GameObject servedRecipe)
-    { 
-        if(servedRecipe.gameObject.name == selectedRecipe.recipeName)
+    {
+        if (servedRecipe.gameObject.name == selectedRecipe.recipeName)
         {
             Debug.Log("¡Pedido correcto!");
             isServed = true;
-            LeaveRestaurant(true);
 
+            // Dar puntos al jugador
+            GameManager.Instance.AddPoints(pointsForOrder);
+
+            // Mostrar puntos flotantes
+            if (floatingPointsPrefab != null)
+            {
+                Vector3 spawnPosition = transform.position + new Vector3(0, 2f, 0);
+                GameObject floating = Instantiate(floatingPointsPrefab, spawnPosition, Quaternion.identity);
+                FloatingPoints fp = floating.GetComponent<FloatingPoints>();
+                if (fp != null)
+                {
+                    fp.SetPoints(pointsForOrder);
+                }
+            }
+
+            StartCoroutine(MoveToExit());
             return true;
-
         }
-        
-
 
         return false;
     }
 
-    private void LeaveRestaurant(bool happy)
+
+    private IEnumerator MoveToExit()
     {
 
-        Debug.Log("Me llamaron para salir, estoy::" + happy);
+        spawner.OnCustomerExit(this);
 
-        if (happy)
-        {
-            //Debug.Log("El cliente se fue feliz.");
-        }
-        else
-        {
-            //Debug.Log("El cliente se fue molesto.");
-        }
-        StartCoroutine(MoveToExit());
-        
-    }
 
-     private IEnumerator MoveToExit()
-     {
-
-        Debug.Log("Iniciando salida");
+       
         Vector3 direction = (exitPosition.position - transform.position).normalized;
         direction.y = 0f;
-
         Quaternion targetRotation = Quaternion.LookRotation(direction);
-        float rotationSpeed = 5f; // Puedes ajustar la velocidad del giro
+        float rotationSpeed = 5f;
 
         while (Quaternion.Angle(transform.rotation, targetRotation) > 0.1f)
         {
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-                yield return null;
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+            yield return null;
         }
-        
+
         while (Vector3.Distance(transform.position, exitPosition.position) > 0.1f)
         {
             transform.position = Vector3.MoveTowards(transform.position, exitPosition.position, moveSpeedExit * Time.deltaTime);
             yield return null;
         }
 
-        // Cliente llegó a la salida
-        //Debug.Log("El cliente ha salido del restaurante.");
-    
-        Destroy(gameObject); // Destruye al cliente
-     }
+        Destroy(gameObject);
+    }
 
+    // Llamado desde el spawner
+    public void SetQueuePosition(CustomerSpawner spawner, int index)
+    {
+        this.spawner = spawner;
+        this.queueIndex = index;
+
+        Transform target = spawner.GetQueueTarget(index);
+        if (target != null)
+        {
+            StartCoroutine(MoveToQueuePosition(target));
+            
+        }
+    }
+
+    private IEnumerator MoveToQueuePosition(Transform target)
+    {
+        while (Vector3.Distance(transform.position, target.position) > 0.1f)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, target.position, moveSpeed * Time.deltaTime);
+            yield return null;
+        }
+
+        if (queueIndex == 0)
+        {
+            ShowOrder();
+        }
+    }
 }

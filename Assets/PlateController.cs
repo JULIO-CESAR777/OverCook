@@ -6,7 +6,8 @@ using UnityEngine;
 public class IngredientNameRequirement
 {
     public string ingredientName;
-    public int quantity = 1;
+    public string requiredState;
+    public int quantity = 2;
 }
 
 [System.Serializable]
@@ -25,6 +26,7 @@ public class PlateController : MonoBehaviour
     [Header("Apilado de ingredientes")]
     public Transform stackingPoint;
     public float stackHeight = 0.05f;
+    
 
     [Header("Punto de aparición del resultado especial")]
     public Transform spawnPoint;
@@ -56,13 +58,30 @@ public class PlateController : MonoBehaviour
         ingredientInstance.transform.localPosition = newPosition;
         ingredientInstance.transform.localRotation = Quaternion.identity;
 
-      
+        Rigidbody rb = ingredientInstance.GetComponent<Rigidbody>();
+
        
+        if (rb != null)
+        {
+            rb.isKinematic = true; // Desactiva la física mientras se mueve
+            rb.detectCollisions = false;
+        }
+
+        Collider col = ingredientInstance.GetComponent<Collider>();
+        if (col != null)
+        {
+            col.enabled = false; // Evita colisiones mientras se mueve
+        }
+
+
+      
+
 
     }
 
     public void CheckRecipeCompletion()
     {
+        if (currentIngredients.Count == 0) return;
         foreach (var recipe in possibleRecipes)
         {
             if (RecipeMatches(recipe))
@@ -78,7 +97,7 @@ public class PlateController : MonoBehaviour
                     gameObject.GetComponent<Rigidbody>().useGravity=true;
                 }
 
-                ResetPlate();
+              
                 Destroy(gameObject);
                 return;
             }
@@ -89,15 +108,20 @@ public class PlateController : MonoBehaviour
 
     private bool RecipeMatches(SimpleRecipe recipe)
     {
+
+      
+        Debug.Log("🔎 Verificando receta: " + recipe.recipeName);
         foreach (var requirement in recipe.requiredIngredients)
         {
             int count = 0;
             foreach (var ing in currentIngredients)
             {
-                if (ing.ingredientData.ingredientName == requirement.ingredientName)
+                if (ing.ingredientData.ingredientName == requirement.ingredientName &&
+                ing.currentState == requirement.requiredState)
                     count++;
             }
 
+            Debug.Log($"Ingrediente requerido: {requirement.ingredientName}, requerido: {requirement.quantity}, encontrados: {count}");
             if (count < requirement.quantity)
                 return false;
         }
@@ -105,35 +129,17 @@ public class PlateController : MonoBehaviour
         return true;
     }
 
-    private void RemoveUsedIngredients(SimpleRecipe recipe)
-    {
-        List<IngredientInstance> toRemove = new List<IngredientInstance>();
 
-        foreach (var requirement in recipe.requiredIngredients)
-        {
-            int needed = requirement.quantity;
-            foreach (var ing in currentIngredients)
-            {
-                if (needed > 0 && ing.ingredientData.ingredientName == requirement.ingredientName)
-                {
-                    toRemove.Add(ing);
-                    needed--;
-                }
-            }
-        }
-
-        foreach (var ing in toRemove)
-        {
-            currentIngredients.Remove(ing);
-            Destroy(ing.gameObject);
-        }
-    }
 
     private void OnTriggerEnter(Collider other)
     {
+
         IngredientInstance ingredient = other.GetComponent<IngredientInstance>();
         if (ingredient != null)
         {
+
+            if (ingredient.wasAddedToPlate) return; // ⚠️ Ya fue agregado
+
             Debug.Log("Ingrediente tocó el plato: " + ingredient.ingredientData.ingredientName);
 
             if (TryAddIngredient(ingredient))
@@ -149,14 +155,4 @@ public class PlateController : MonoBehaviour
 
     // YO JULIOOOO
 
-    private void ResetPlate()
-    {
-        foreach (var ing in currentIngredients)
-        {
-            Destroy(ing.gameObject);
-        }
-
-        currentIngredients.Clear();
-        recipeCompleted = false;
-    }
 }

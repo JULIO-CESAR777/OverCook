@@ -6,6 +6,9 @@ public class GameManager : MonoBehaviour
 
     [Header("Recetas disponibles en el juego")]
     public List<RecipeSO> allRecipes;
+    public int score = 0;
+
+   
 
     private void Awake()
     {
@@ -23,5 +26,14 @@ public class GameManager : MonoBehaviour
     public List<RecipeSO> GetAllRecipes()
     {
         return allRecipes;
+    }
+
+
+    //JULIOOOOOO
+
+    public void AddPoints(int points)
+    {
+        score += points;
+        Debug.Log($"Puntos actuales: {score}");
     }
 }
