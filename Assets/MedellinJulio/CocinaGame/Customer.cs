@@ -1,10 +1,16 @@
-using UnityEngine;
+﻿using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Collections;
 
 public class Customer : MonoBehaviour
 {
+
+    [Header("ParticleSystem")]
+
+    public ParticleSystem particleHappy;
+    public ParticleSystem particleÑo;
+
     [Header("Movimiento")]
     public float moveSpeed = 2f;
     public float moveSpeedExit = 0.5f;
@@ -28,6 +34,7 @@ public class Customer : MonoBehaviour
 
     [Header("UI de Paciencia")]
     public GameObject patienceSliderPrefab;
+    private GameObject instantiatedSliderGO;
     private Slider patienceSlider;
 
     // Referencia al spawner
@@ -37,6 +44,7 @@ public class Customer : MonoBehaviour
     private void Start()
     {
         ChooseRandomRecipe();
+        patienceTime = Random.Range(30, 40);
         currentPatience = patienceTime;
 
         GameObject exit = GameObject.Find("ExitCustomer");
@@ -46,21 +54,10 @@ public class Customer : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("No se encontr� el objeto 'ExitCustomer' en la escena.");
+            Debug.LogWarning("No se encontró el objeto 'ExitCustomer' en la escena.");
         }
         // Instanciar slider de paciencia
-        if (patienceSliderPrefab != null)
-        {
-            GameObject sliderGO = Instantiate(patienceSliderPrefab, transform.position + new Vector3(0, 3f, 0), Quaternion.identity, transform);
-            sliderGO.transform.SetParent(transform); // Sigue al cliente
-            patienceSlider = sliderGO.GetComponentInChildren<Slider>();
-
-            if (patienceSlider != null)
-            {
-                patienceSlider.maxValue = patienceTime;
-                patienceSlider.value = currentPatience;
-            }
-        }
+       
     }
 
     private void Update()
@@ -106,7 +103,19 @@ public class Customer : MonoBehaviour
         esperanding = true;
         if (speechBubblePrefab != null)
         {
-            currentSpeechBubble = Instantiate(speechBubblePrefab, transform.position + new Vector3(0, 4f, 0), Quaternion.identity, transform);
+            currentSpeechBubble = Instantiate(speechBubblePrefab, transform.position + new Vector3(0, 3f, 0), Quaternion.identity, transform);
+            if (patienceSliderPrefab != null)
+            {
+                instantiatedSliderGO = Instantiate(patienceSliderPrefab,transform.position + new Vector3(0, 2f, 0),Quaternion.identity,transform);
+
+                instantiatedSliderGO.transform.SetParent(transform); // Sigue al cliente
+                patienceSlider = instantiatedSliderGO.GetComponentInChildren<Slider>();
+                if (patienceSlider != null)
+                {
+                    patienceSlider.maxValue = patienceTime;
+                    patienceSlider.value = currentPatience;
+                }
+            }
             var textComponent = currentSpeechBubble.GetComponentInChildren<TextMeshProUGUI>();
             if (textComponent != null)
             {
@@ -121,9 +130,25 @@ public class Customer : MonoBehaviour
 
     public bool ServeOrder(GameObject servedRecipe)
     {
+      
+       
+
+
         if (servedRecipe.gameObject.name == selectedRecipe.recipeName)
         {
-            Debug.Log("�Pedido correcto!");
+            ParticleSystem psHappy = Instantiate(particleHappy, transform.position + new Vector3(0, 3f, 0), Quaternion.identity);
+            psHappy.Play();
+            Destroy(psHappy.gameObject, psHappy.main.duration);
+            // ✅ Destruir el slider y la burbuja si existen
+            if (instantiatedSliderGO != null)
+            {
+                Destroy(instantiatedSliderGO);
+            }
+
+            if (currentSpeechBubble != null)
+            {
+                Destroy(currentSpeechBubble);
+            }
             isServed = true;
 
             // Dar puntos al jugador
@@ -132,8 +157,14 @@ public class Customer : MonoBehaviour
             // Mostrar puntos flotantes
             if (floatingPointsPrefab != null)
             {
-                Vector3 spawnPosition = transform.position + new Vector3(0, 2f, 0);
+                Debug.Log("Puntos Volando");
+                Vector3 spawnPosition = transform.position + new Vector3(0, 3f, 0);
                 GameObject floating = Instantiate(floatingPointsPrefab, spawnPosition, Quaternion.identity);
+
+                //ROTAR LA CAMARAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAA
+                floating.transform.LookAt(Camera.main.transform);
+                floating.transform.Rotate(0, 180f, 0); 
+
                 FloatingPoints fp = floating.GetComponent<FloatingPoints>();
                 if (fp != null)
                 {
@@ -144,7 +175,15 @@ public class Customer : MonoBehaviour
             StartCoroutine(MoveToExit());
             return true;
         }
+        else
+        {
+            ParticleSystem psÑo = Instantiate(particleÑo, transform.position + new Vector3(0, 3f, 0), Quaternion.identity);
+            psÑo.Play();
+            Destroy(psÑo.gameObject, psÑo.main.duration);
 
+        }   
+      
+       
         return false;
     }
 

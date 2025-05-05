@@ -11,6 +11,7 @@ TagManager:
   - CuttingBoard
   - Recipe
   - Customer
+  - SpawnerPlates
   layers:
   - Default
   - TransparentFX

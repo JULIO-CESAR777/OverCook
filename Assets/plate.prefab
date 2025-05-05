@@ -191,21 +191,24 @@ MonoBehaviour:
   currentIngredients: []
   recipeCompleted: 0
   stackingPoint: {fileID: 3074025084472083183}
-  stackHeight: 0.1
+  stackHeight: 0.3
   spawnPoint: {fileID: 6027461637356086989}
   possibleRecipes:
   - recipeName: SaladaChida
     requiredIngredients:
-    - ingredientName: Lettuce
-      requiredState: Cortado
-      quantity: 4
-    resultPrefab: {fileID: 5558201821580814209, guid: 3112c314905039640832b1f06e64ea98, type: 3}
-  - recipeName: Carne
-    requiredIngredients:
     - ingredientName: Tomato
       requiredState: Cortado
       quantity: 4
-    resultPrefab: {fileID: 8482271487754552451, guid: 406eb35c3356090448a063064fa3a824, type: 3}
+    - ingredientName: Lettuce
+      requiredState: Cortado
+      quantity: 2
+    resultPrefab: {fileID: 1102718769189006761, guid: 0862413c71149914397b0d0fb538b68b, type: 3}
+  - recipeName: Carne
+    requiredIngredients:
+    - ingredientName: Lettuce
+      requiredState: Cortado
+      quantity: 4
+    resultPrefab: {fileID: 3170102458957722091, guid: 442393218bcb14746ae60f7e10fb5bb4, type: 3}
 --- !u!65 &8971055884820339954
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -225,8 +228,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.9499999, y: 0.7767042, z: 0.9499999}
-  m_Center: {x: -0.00000002854082, y: 0.3883521, z: -4.3919484e-16}
+  m_Size: {x: 0.9499999, y: 1.2553416, z: 0.9499999}
+  m_Center: {x: -0.00000002854082, y: 0.6276708, z: -3.0963364e-16}
 --- !u!54 &6699273444053897943
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -279,7 +282,7 @@ Transform:
   m_GameObject: {fileID: 9100441219615687525}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.089, z: 0}
+  m_LocalPosition: {x: 0, y: 0.189, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

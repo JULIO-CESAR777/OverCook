@@ -7,8 +7,9 @@ public class GameManager : MonoBehaviour
     [Header("Recetas disponibles en el juego")]
     public List<RecipeSO> allRecipes;
     public int score = 0;
+    public int goalScore = 100;
 
-   
+
 
     private void Awake()
     {
@@ -35,5 +36,10 @@ public class GameManager : MonoBehaviour
     {
         score += points;
         Debug.Log($"Puntos actuales: {score}");
+        if (score >= goalScore)
+        {
+            Debug.Log("¡Meta alcanzada!");
+            // Aquí podrías llamar un UI, cambiar de nivel, etc.
+        }
     }
 }

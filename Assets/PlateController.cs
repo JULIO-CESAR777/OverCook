@@ -93,7 +93,7 @@ public class PlateController : MonoBehaviour
                     Vector3 spawnPosition = stackingPoint.position + Vector3.up * 0.5f; // Aumenta 0.3 en Y
                     GameObject result= Instantiate(recipe.resultPrefab, stackingPoint.position, Quaternion.identity);
                     result.name = recipe.resultPrefab.name;
-                    Debug.Log($"✅ Receta completada: {recipe.recipeName}");
+                  
                     gameObject.GetComponent<Rigidbody>().useGravity=true;
                 }
 
@@ -110,7 +110,7 @@ public class PlateController : MonoBehaviour
     {
 
       
-        Debug.Log("🔎 Verificando receta: " + recipe.recipeName);
+       
         foreach (var requirement in recipe.requiredIngredients)
         {
             int count = 0;
@@ -121,7 +121,7 @@ public class PlateController : MonoBehaviour
                     count++;
             }
 
-            Debug.Log($"Ingrediente requerido: {requirement.ingredientName}, requerido: {requirement.quantity}, encontrados: {count}");
+           
             if (count < requirement.quantity)
                 return false;
         }
@@ -140,7 +140,7 @@ public class PlateController : MonoBehaviour
 
             if (ingredient.wasAddedToPlate) return; // ⚠️ Ya fue agregado
 
-            Debug.Log("Ingrediente tocó el plato: " + ingredient.ingredientData.ingredientName);
+          
 
             if (TryAddIngredient(ingredient))
             {

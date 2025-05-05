@@ -129,6 +129,15 @@ public class PlayerInteractions : MonoBehaviour
 
             }
 
+            if (hit.collider.CompareTag(interactTag[6]) && !isDoingAnAction)
+            {
+                currentInteractable = hit.collider.gameObject;
+                interfaceText.text = "Press F to interact";
+                textInteractions.SetActive(true);
+
+                return;
+            }
+
 
         }
 
@@ -198,6 +207,12 @@ public class PlayerInteractions : MonoBehaviour
 
             }
 
+            if (currentInteractable.CompareTag(interactTag[6]))
+            {
+                if (isDoingAnAction) return;
+                var interactable = currentInteractable.GetComponent<SpawnerPlates>();
+                interactable?.SpawnPlate();
+            }
 
         }
         //Comprobacion cuando se quiere soltar un objeto

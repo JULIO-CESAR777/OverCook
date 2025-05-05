@@ -121,6 +121,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be8c6617d173c314a94ca19666dd1e20, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  particleHappy: {fileID: 912714878263040772, guid: 4e273c58acd2b614084a98035db3ba7c, type: 3}
+  "particle\xD1o": {fileID: 6356438961120104147, guid: d8703a33a4eb0b84a875202fde23e8f7, type: 3}
   moveSpeed: 4
   moveSpeedExit: 2
   exitPosition: {fileID: 0}
