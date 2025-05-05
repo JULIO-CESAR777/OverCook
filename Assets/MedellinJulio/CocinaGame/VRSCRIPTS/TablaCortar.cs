@@ -25,15 +25,14 @@ public class TablaCortar : MonoBehaviour
         return false;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     public void OnTriggerEnter(Collider other)
     {
-        
+        if (other.CompareTag("Ingredient")) 
+        {
+            IngredientInstance instance = other.GetComponent<IngredientInstance>();
+            TryAddIngredient(instance );
+        }
     }
 
 }
