@@ -728,7 +728,19 @@ MonoBehaviour:
   showEvents: 1
   onGrab:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 7376863563000847090}
+        m_TargetAssemblyTypeName: IngredientSpawner, Assembly-CSharp
+        m_MethodName: SpawnIngredient
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   onRelease:
     m_PersistentCalls:
       m_Calls: []
@@ -753,3 +765,14 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5589561665525731172, guid: 0221bfad0a2f7fc4dbf949a7f709d080, type: 3}
   m_PrefabInstance: {fileID: 3142932856491206349}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &7376863563000847090 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5603061315233905727, guid: 0221bfad0a2f7fc4dbf949a7f709d080, type: 3}
+  m_PrefabInstance: {fileID: 3142932856491206349}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2799828648360424332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d22985cdc1a0545448b70edf152c7d12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
