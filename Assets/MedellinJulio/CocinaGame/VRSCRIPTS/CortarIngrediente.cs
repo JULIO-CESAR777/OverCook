@@ -5,19 +5,24 @@ public class CortarIngrediente : MonoBehaviour
 
 
     TablaCortar tablacortar;
-    ParticleSystem particulasCortar;
+    public ParticleSystem particulasCortar;
 
+    private void Start()
+    {
+        tablacortar = GetComponentInParent<TablaCortar>();
+    }
     public void cutIngredient( )
     {
+        
+       
+        if (tablacortar.ingredientOnBoard == null) return;
+
         ParticleSystem pscortar = Instantiate(particulasCortar, transform.position + new Vector3(0, 1f, 0), Quaternion.identity);
         pscortar.Play();
         Destroy(pscortar.gameObject, pscortar.main.duration);
-        if (!tablacortar.readyToCut) return;
-        if (tablacortar.ingredientOnBoard == null) return;
-
 
         tablacortar.progress += 30f;
-
+        Debug.Log("Progreso de corte: " + tablacortar.progress);
         if (tablacortar.progress >= 90)
         {
 
