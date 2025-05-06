@@ -144,6 +144,8 @@ public class PlateController : MonoBehaviour
 
             if (TryAddIngredient(ingredient))
             {
+                //SOLO LE AÑADI ESTO PARA VR PERO ALCH NO SE SI SI AFECTE PERO SI FUNCIONA NO LE MUEVO
+                ingredient.wasAddedToPlate = true;
                 Debug.Log("Ingrediente agregado al plato exitosamente.");
             }
             else

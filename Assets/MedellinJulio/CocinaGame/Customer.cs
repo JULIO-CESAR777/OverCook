@@ -2,6 +2,7 @@
 using TMPro;
 using UnityEngine.UI;
 using System.Collections;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public class Customer : MonoBehaviour
 {
@@ -171,7 +172,8 @@ public class Customer : MonoBehaviour
                     fp.SetPoints(pointsForOrder);
                 }
             }
-
+            //AGREGUE ESTO PARA VRRRRRRRR, ESTOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO NO SE OLVIEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+            Destroy(servedRecipe);
             StartCoroutine(MoveToExit());
             return true;
         }
@@ -240,6 +242,22 @@ public class Customer : MonoBehaviour
         if (queueIndex == 0)
         {
             ShowOrder();
+        }
+    }
+
+
+    //AGREGANDO ESTO SOLO PARA VR
+    private void OnTriggerEnter(Collider other)
+    {
+
+        Debug.Log("Entre a colisionar");
+        if (other.CompareTag("Recipe") && esperanding)
+        {
+            Debug.Log("Entre en lka instancia");
+            
+           
+           ServeOrder(other.gameObject);
+            
         }
     }
 }
