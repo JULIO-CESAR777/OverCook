@@ -6,15 +6,7 @@ public class IngredientSpawner : MonoBehaviour
 {
     //[SerializeField] private GameObject ingredient;
     public IngredientSO ingredientSO;
-    public BoxCollider topOfTheBox;
     public Transform spawnPoint;
-
-    private bool canSpawnIngredient;
-
-    void Awake()
-    {
-        topOfTheBox = GetComponentInChildren<BoxCollider>();
-    }
 
     public void SpawnIngredient()
     {

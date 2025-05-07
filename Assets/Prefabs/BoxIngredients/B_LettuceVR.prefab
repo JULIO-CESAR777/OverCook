@@ -530,7 +530,7 @@ PrefabInstance:
       objectReference: {fileID: -1724080987372072942, guid: 138532a78c819a94fb59e39d14130e46, type: 3}
     - target: {fileID: 956748382149530945, guid: 0221bfad0a2f7fc4dbf949a7f709d080, type: 3}
       propertyPath: m_Name
-      value: B_Lettuce Variant
+      value: B_LettuceVR
       objectReference: {fileID: 0}
     - target: {fileID: 1314335704669076768, guid: 0221bfad0a2f7fc4dbf949a7f709d080, type: 3}
       propertyPath: m_LocalPosition.y
@@ -653,7 +653,8 @@ PrefabInstance:
       value: 0.13372421
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 2641581604806760588, guid: 0221bfad0a2f7fc4dbf949a7f709d080, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 5589561665525731172, guid: 0221bfad0a2f7fc4dbf949a7f709d080, type: 3}
       insertIndex: -1
@@ -673,10 +674,106 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5589561665525731172, guid: 0221bfad0a2f7fc4dbf949a7f709d080, type: 3}
       insertIndex: -1
       addedObject: {fileID: 9088102067311129901}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 956748382149530945, guid: 0221bfad0a2f7fc4dbf949a7f709d080, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6789878945512391057}
   m_SourcePrefab: {fileID: 100100000, guid: 0221bfad0a2f7fc4dbf949a7f709d080, type: 3}
+--- !u!1 &2799828648360424332 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 956748382149530945, guid: 0221bfad0a2f7fc4dbf949a7f709d080, type: 3}
+  m_PrefabInstance: {fileID: 3142932856491206349}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6789878945512391057
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2799828648360424332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 822bc9090447b9c40833509c4a32e597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ignoreMe: 0
+  body: {fileID: 0}
+  hightlightMaterial: {fileID: 0}
+  isGrabbable: 1
+  CopySettings: {fileID: 0}
+  grabType: 0
+  handType: 0
+  singleHandOnly: 0
+  instantGrab: 0
+  useGentleGrab: 0
+  maintainGrabOffset: 0
+  parentOnGrab: 1
+  heldNoFriction: 1
+  ignoreWeight: 0
+  allowHeldSwapping: 1
+  throwPower: 1
+  jointBreakForce: 3500
+  showAdvancedSettings: 1
+  makeChildrenGrabbable: 1
+  grabPriorityWeight: 1
+  ignoreReleaseTime: 0.5
+  minHeldDrag: 1.5
+  minHeldAngleDrag: 3
+  maxHeldVelocity: 10
+  heldPositionOffset: {x: 0, y: 0, z: 0}
+  heldRotationOffset: {x: 0, y: 0, z: 0}
+  customGrabJoint: {fileID: 0}
+  jointedBodies: []
+  heldIgnoreColliders: []
+  pullApartBreakOnly: 1
+  showEvents: 1
+  onGrab:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 7376863563000847090}
+        m_TargetAssemblyTypeName: IngredientSpawner, Assembly-CSharp
+        m_MethodName: SpawnIngredient
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onRelease:
+    m_PersistentCalls:
+      m_Calls: []
+  onSqueeze:
+    m_PersistentCalls:
+      m_Calls: []
+  onUnsqueeze:
+    m_PersistentCalls:
+      m_Calls: []
+  onHighlight:
+    m_PersistentCalls:
+      m_Calls: []
+  onUnhighlight:
+    m_PersistentCalls:
+      m_Calls: []
+  OnJointBreak:
+    m_PersistentCalls:
+      m_Calls: []
+  lockHandOnGrab: 0
 --- !u!4 &7354356749471754665 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5589561665525731172, guid: 0221bfad0a2f7fc4dbf949a7f709d080, type: 3}
   m_PrefabInstance: {fileID: 3142932856491206349}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &7376863563000847090 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5603061315233905727, guid: 0221bfad0a2f7fc4dbf949a7f709d080, type: 3}
+  m_PrefabInstance: {fileID: 3142932856491206349}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2799828648360424332}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d22985cdc1a0545448b70edf152c7d12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
