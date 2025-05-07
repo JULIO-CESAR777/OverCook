@@ -11,6 +11,8 @@ public class VrDetector : MonoBehaviour
     [SerializeField] public GameObject CanvasVR;
     [SerializeField] public GameObject Player;
 
+    public bool flag;
+
 
     void Start()
     {
@@ -18,28 +20,39 @@ public class VrDetector : MonoBehaviour
 
         if (xrManager.isInitializationComplete && xrManager.activeLoader != null)
         {
-            Debug.Log("XR is initialized and active.");
             // Lógica VR
             Canvas.SetActive(false);
             Camera.SetActive(false);
 
             CanvasVR.SetActive(true);
             Player.SetActive(true);
+
+            flag = false;
+
+
         }
         else
         {
-            Debug.Log("XR is not active.");
             // Lógica no-VR
             Canvas.SetActive(true);
             Camera.SetActive(true);
 
             CanvasVR.SetActive(false);
             Player.SetActive(false);
+
+            flag = true;
+
         }
     }
 
     public void StartGame(){
-        SceneManager.LoadScene("Cooking");
+        if (flag)
+        {
+            SceneManager.LoadScene("Cooking");
+        }
+        else {
+            SceneManager.LoadScene("CookingVR");
+        }
     }
 
     public void QuitGame(){

@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using Autohand;
 using UnityEngine;
+using UnityEngine.InputSystem.HID;
 
 [System.Serializable]
 public class IngredientNameRequirement
@@ -29,7 +31,7 @@ public class PlateController : MonoBehaviour
     
 
     [Header("Punto de aparición del resultado especial")]
-    public Transform spawnPoint;
+    //public Transform spawnPoint;
 
     [Header("Recetas disponibles")]
     public List<SimpleRecipe> possibleRecipes;
@@ -44,6 +46,7 @@ public class PlateController : MonoBehaviour
         if (ingredientInstance == null)
             return false;
 
+       
         StackIngredient(ingredientInstance);
         currentIngredients.Add(ingredientInstance);
         CheckRecipeCompletion();
@@ -53,10 +56,24 @@ public class PlateController : MonoBehaviour
 
     private void StackIngredient(IngredientInstance ingredientInstance)
     {
+        //ingredientInstance.transform.SetParent(stackingPoint);
+        //Vector3 newPosition = Vector3.up * (stackHeight * stackingPoint.childCount);
+        //ingredientInstance.transform.localPosition = newPosition;
+        //ingredientInstance.transform.localRotation = Quaternion.identity;
+
+        // Obtener cuántos ingredientes hay ya en la pila
+        int ingredientIndex = stackingPoint.childCount;
+
+        // Establecer el padre primero
         ingredientInstance.transform.SetParent(stackingPoint);
-        Vector3 newPosition = Vector3.up * (stackHeight * stackingPoint.childCount);
+
+        // Calcular la posición en Y según la altura de cada ingrediente
+        Vector3 newPosition = Vector3.up * (stackHeight * ingredientIndex);
+
+        // Posicionar y rotar localmente
         ingredientInstance.transform.localPosition = newPosition;
         ingredientInstance.transform.localRotation = Quaternion.identity;
+
 
         Rigidbody rb = ingredientInstance.GetComponent<Rigidbody>();
 
@@ -73,9 +90,13 @@ public class PlateController : MonoBehaviour
             col.enabled = false; // Evita colisiones mientras se mueve
         }
 
+        if (gameObject.GetComponent<Grabbable>())
+        {
+            Grabbable grabbable = ingredientInstance.GetComponent<Grabbable>();
+            grabbable.enabled = false;
+        }
 
-      
-
+        ingredientInstance.canBePickedUp = false;
 
     }
 
@@ -97,7 +118,9 @@ public class PlateController : MonoBehaviour
                     gameObject.GetComponent<Rigidbody>().useGravity=true;
                 }
 
-              
+                // Destruir todos los ingredientes por el tema del VR SI HAY FALLOS EN NO VRRR BORRAR ESTOOOOOOO
+                DestroyIngredients();
+
                 Destroy(gameObject);
                 return;
             }
@@ -109,8 +132,6 @@ public class PlateController : MonoBehaviour
     private bool RecipeMatches(SimpleRecipe recipe)
     {
 
-      
-       
         foreach (var requirement in recipe.requiredIngredients)
         {
             int count = 0;
@@ -155,6 +176,19 @@ public class PlateController : MonoBehaviour
         }
     }
 
-    // YO JULIOOOO
+    // YO JULIOOOO SI HAY FALLOS YA UQE ESTO ESWTA ADAPTADO PARA VR IWIWIWOWOWOWW
+    private void DestroyIngredients()
+    {
+        foreach (var ingredient in currentIngredients)
+        {
+            // Asegúrate de destruir los ingredientes individualmente
+            if (ingredient != null)
+            {
+                Destroy(ingredient.gameObject);
+            }
+        }
 
+        // Limpiar la lista de ingredientes para evitar referencias no deseadas
+        currentIngredients.Clear();
+    }
 }

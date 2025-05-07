@@ -1,3 +1,4 @@
+using Autohand;
 using Unity.XR.CoreUtils;
 using UnityEngine;
 
@@ -18,11 +19,6 @@ public class IngredientSpawner : MonoBehaviour
     public void SpawnIngredient()
     {
         Transform child = transform.GetChild(0);
-        canSpawnIngredient = child.GetComponent<ChecksTopBox>().canSpawnIngredient;
-        if (!canSpawnIngredient)
-        {
-            return;
-        }
 
         // Aquí se busca el estado y el prefab correspondiente basado en `stateName`
         foreach (var state in ingredientSO.states)
