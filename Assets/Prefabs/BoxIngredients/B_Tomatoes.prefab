@@ -443,7 +443,7 @@ GameObject:
   - component: {fileID: 3679969170256635875}
   - component: {fileID: 200292648475800019}
   m_Layer: 0
-  m_Name: B_TomatoesVR
+  m_Name: B_Tomatoes
   m_TagString: Interactable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
