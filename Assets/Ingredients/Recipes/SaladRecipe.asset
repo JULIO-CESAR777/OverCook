@@ -22,4 +22,4 @@ MonoBehaviour:
     requiredState: Crudo
     quantity: 1
   isSpecialCombination: 0
-  specialResultPrefab: {fileID: 8482271487754552451, guid: 406eb35c3356090448a063064fa3a824, type: 3}
+  specialResultPrefab: {fileID: 3170102458957722091, guid: 442393218bcb14746ae60f7e10fb5bb4, type: 3}

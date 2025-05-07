@@ -30,9 +30,6 @@ public class PlateController : MonoBehaviour
     public float stackHeight = 0.05f;
     
 
-    [Header("Punto de aparición del resultado especial")]
-    //public Transform spawnPoint;
-
     [Header("Recetas disponibles")]
     public List<SimpleRecipe> possibleRecipes;
 
@@ -151,6 +148,28 @@ public class PlateController : MonoBehaviour
     }
 
 
+    void OnCollisionEnter(Collision other)
+    {
+        IngredientInstance ingredient = other.gameObject.GetComponent<IngredientInstance>();
+        if (ingredient != null)
+        {
+
+            if (ingredient.wasAddedToPlate) return; // ⚠️ Ya fue agregado
+
+          
+
+            if (TryAddIngredient(ingredient))
+            {
+                //SOLO LE AÑADI ESTO PARA VR PERO ALCH NO SE SI SI AFECTE PERO SI FUNCIONA NO LE MUEVO
+                ingredient.wasAddedToPlate = true;
+                Debug.Log("Ingrediente agregado al plato exitosamente.");
+            }
+            else
+            {
+                Debug.Log("Ingrediente no compatible, no se agregó.");
+            }
+        }
+    }
 
     private void OnTriggerEnter(Collider other)
     {

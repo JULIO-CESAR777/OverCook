@@ -5,6 +5,36 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+public static class DebugExtension
+{
+    public static void DebugWireSphere(Vector3 position, Color color, float radius = 1.0f)
+    {
+        float angle = 10.0f;
+        Vector3 lastPoint = Vector3.zero;
+        Vector3 nextPoint = Vector3.zero;
+        for (int i = 0; i <= 36; i++)
+        {
+            float theta = i * angle * Mathf.Deg2Rad;
+
+            // Draw circle on XZ plane
+            lastPoint = new Vector3(Mathf.Cos(theta - angle * Mathf.Deg2Rad), 0, Mathf.Sin(theta - angle * Mathf.Deg2Rad)) * radius + position;
+            nextPoint = new Vector3(Mathf.Cos(theta), 0, Mathf.Sin(theta)) * radius + position;
+            Debug.DrawLine(lastPoint, nextPoint, color);
+
+            // Draw circle on XY plane
+            lastPoint = new Vector3(Mathf.Cos(theta - angle * Mathf.Deg2Rad), Mathf.Sin(theta - angle * Mathf.Deg2Rad), 0) * radius + position;
+            nextPoint = new Vector3(Mathf.Cos(theta), Mathf.Sin(theta), 0) * radius + position;
+            Debug.DrawLine(lastPoint, nextPoint, color);
+
+            // Draw circle on YZ plane
+            lastPoint = new Vector3(0, Mathf.Cos(theta - angle * Mathf.Deg2Rad), Mathf.Sin(theta - angle * Mathf.Deg2Rad)) * radius + position;
+            nextPoint = new Vector3(0, Mathf.Cos(theta), Mathf.Sin(theta)) * radius + position;
+            Debug.DrawLine(lastPoint, nextPoint, color);
+        }
+    }
+}
+
+
 public class PlayerInteractions : MonoBehaviour
 {
     [Header("Input")]
@@ -74,75 +104,128 @@ public class PlayerInteractions : MonoBehaviour
         }
     }
 
-    private void HandleInteractionRaycast()
+    private GameObject GetBestInteractable()
     {
-        
+        // Opción 1: Chequear objetos en el rayo principal
         Ray ray = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
-        RaycastHit hit;
+        RaycastHit[] hits = Physics.SphereCastAll(ray, 0.3f, rayDistance);
 
-        if (Physics.SphereCast(ray, 0.3f, out hit, rayDistance)) // ← esto amplía el rango
+        // Opción 2: Chequear objetos cercanos con OverlapSphere
+        Collider[] closeColliders = Physics.OverlapSphere(mainCamera.transform.position, 0.5f);
+
+        // Convertir todos los resultados a GameObjects
+        List<GameObject> potentialTargets = new List<GameObject>();
+
+        // Añadir objetos del SphereCast
+        foreach (RaycastHit hit in hits)
         {
-            //Interactuable
-            if (hit.collider.CompareTag(interactTag[0]) && !isDoingAnAction)
+            if (!hit.collider.transform.IsChildOf(this.transform))
             {
-                currentInteractable = hit.collider.gameObject;
-                interfaceText.text = "Press F to interact";
-                textInteractions.SetActive(true);
-
-                return;
+                potentialTargets.Add(hit.collider.gameObject);
             }
-            // Algo agarrable
-            if((hit.collider.CompareTag(interactTag[1]) || hit.collider.CompareTag(interactTag[4]) || hit.collider.CompareTag(interactTag[2])) && !isDoingAnAction){
-                currentInteractable = hit.collider.gameObject;
-                interfaceText.text = "Press F to grab";
-                textInteractions.SetActive(true);
-                return;
-            }
-            //Colocar ingrediente en plato
-            if (hit.collider.CompareTag(interactTag[2]) && isDoingAnAction)
-            {
-                currentInteractable = hit.collider.gameObject;
-
-                interfaceText.text = currentInteractable.GetComponent<PlateController>().recipeCompleted
-                    ? ""
-                    : "Press F to place ingredient";
-                
-                textInteractions.SetActive(true);
-                return;
-            }
-            // Interaccion en tabla de cortar
-            if(hit.collider.CompareTag(interactTag[3])){
-                if(isDoingAnAction || hit.collider.gameObject.GetComponent<CuttingBoard>().ingredientOnBoard != null){
-                    currentInteractable = hit.collider.gameObject;
-                    interfaceText.text = "Press F to cut";
-                    textInteractions.SetActive(true);
-                    return;
-                }
-            }
-
-            if (hit.collider.CompareTag(interactTag[5]) && isDoingAnAction && grabObject.CompareTag("Recipe"))
-            {
-                currentInteractable = hit.collider.gameObject;
-                interfaceText.text = "Press F to give";
-                textInteractions.SetActive(true);
-                return;
-
-            }
-
-            if (hit.collider.CompareTag(interactTag[6]) && !isDoingAnAction)
-            {
-                currentInteractable = hit.collider.gameObject;
-                interfaceText.text = "Press F to interact";
-                textInteractions.SetActive(true);
-
-                return;
-            }
-
-
         }
 
+        // Añadir objetos del OverlapSphere
+        foreach (Collider col in closeColliders)
+        {
+            if (!col.transform.IsChildOf(this.transform) && !potentialTargets.Contains(col.gameObject))
+            {
+                potentialTargets.Add(col.gameObject);
+            }
+        }
+
+        if (potentialTargets.Count == 0)
+            return null;
+
+        // Encontrar el objeto más "frontal"
+        GameObject bestTarget = null;
+        float smallestAngle = Mathf.Infinity;
+
+        foreach (GameObject target in potentialTargets)
+        {
+            Vector3 targetDir = (target.transform.position - mainCamera.transform.position).normalized;
+            float angle = Vector3.Angle(mainCamera.transform.forward, targetDir);
+
+            if (angle < smallestAngle)
+            {
+                smallestAngle = angle;
+                bestTarget = target;
+            }
+        }
+
+        return bestTarget;
+    }
+
+    private void HandleInteractionRaycast()
+    {
+        GameObject bestTarget = GetBestInteractable();
+
+        if (bestTarget == null)
+        {
+            currentInteractable = null;
+            textInteractions.SetActive(false);
+            return;
+        }
+
+        // Resto de tu lógica de interacción usando bestTarget
+        if (bestTarget.CompareTag(interactTag[0]) && !isDoingAnAction)
+        {
+            currentInteractable = bestTarget;
+            interfaceText.text = "Press F to interact";
+            textInteractions.SetActive(true);
+            return;
+        }
+
+
+        if ((bestTarget.CompareTag(interactTag[1]) || bestTarget.CompareTag(interactTag[4]) || bestTarget.CompareTag(interactTag[2])) && !isDoingAnAction)
+        {
+            currentInteractable = bestTarget.gameObject;
+            interfaceText.text = "Press F to grab";
+            textInteractions.SetActive(true);
+            return;
+        }
+
+        if (bestTarget.CompareTag(interactTag[2]) && isDoingAnAction)
+        {
+            currentInteractable = bestTarget.gameObject;
+            interfaceText.text = currentInteractable.GetComponent<PlateController>().recipeCompleted
+                ? ""
+                : "Press F to place ingredient";
+            textInteractions.SetActive(true);
+            return;
+        }
+
+        if (bestTarget.CompareTag(interactTag[3]))
+        {
+            if (isDoingAnAction || bestTarget.gameObject.GetComponent<CuttingBoard>().ingredientOnBoard != null)
+            {
+                currentInteractable = bestTarget.gameObject;
+                interfaceText.text = "Press F to cut";
+                textInteractions.SetActive(true);
+                return;
+            }
+        }
+
+        if (bestTarget.CompareTag(interactTag[5]) && isDoingAnAction && grabObject.CompareTag("Recipe"))
+        {
+            currentInteractable = bestTarget.gameObject;
+            interfaceText.text = "Press F to give";
+            textInteractions.SetActive(true);
+            return;
+        }
+
+        if (bestTarget.CompareTag(interactTag[6]) && !isDoingAnAction)
+        {
+            currentInteractable = bestTarget.gameObject;
+            interfaceText.text = "Press F to interact";
+            textInteractions.SetActive(true);
+            return;
+        }
+
+        // Si nada coincide
         currentInteractable = null;
         textInteractions.SetActive(false);
+
     }
 
     private void OnInteract(InputAction.CallbackContext context)
@@ -434,13 +517,24 @@ public class PlayerInteractions : MonoBehaviour
             Debug.Log("Borrado objetos");
             
         }
-     
-
-        
-
-        
 
     }
+
+    private void OnDrawGizmos()
+    {
+        if (mainCamera == null) return;
+
+        // Esfera de alcance lejano (SphereCast)
+        Gizmos.color = Color.red;
+        Gizmos.DrawRay(mainCamera.transform.position, mainCamera.transform.forward * rayDistance);
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(mainCamera.transform.position + mainCamera.transform.forward * rayDistance, 0.3f);
+        
+        // Esfera de alcance cercano (OverlapSphere)
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(mainCamera.transform.position, 0.5f);
+    }
+
 
 
 }
