@@ -38,7 +38,6 @@ public class TablaCortar : MonoBehaviour
             dentro = true;
             Debug.Log(dentro);
             IngredientInstance instance = other.GetComponent<IngredientInstance>();
-
             TryAddIngredient(instance );
         }
     }

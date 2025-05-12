@@ -140,7 +140,9 @@ public class Customer : MonoBehaviour
             ParticleSystem psHappy = Instantiate(particleHappy, transform.position + new Vector3(0, 3f, 0), Quaternion.identity);
             psHappy.Play();
             Destroy(psHappy.gameObject, psHappy.main.duration);
+            
             // ✅ Destruir el slider y la burbuja si existen
+            
             if (instantiatedSliderGO != null)
             {
                 Destroy(instantiatedSliderGO);
@@ -172,6 +174,7 @@ public class Customer : MonoBehaviour
                     fp.SetPoints(pointsForOrder);
                 }
             }
+            
             //AGREGUE ESTO PARA VRRRRRRRR, ESTOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO NO SE OLVIEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             Destroy(servedRecipe);
             StartCoroutine(MoveToExit());
@@ -250,11 +253,10 @@ public class Customer : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
 
-        Debug.Log("Entre a colisionar");
+        //Debug.Log("Entre a colisionar");
         if (other.CompareTag("Recipe") && esperanding)
         {
-            Debug.Log("Entre en lka instancia");
-            
+            //Debug.Log("Entre en lka instancia");
            
            ServeOrder(other.gameObject);
             

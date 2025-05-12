@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Autohand;
+using UnityEngine.SceneManagement;
 
 public class PlateController : MonoBehaviour
 {
@@ -10,6 +11,16 @@ public class PlateController : MonoBehaviour
     [Header("Apilado de ingredientes")]
     public Transform stackingPoint;
     public float stackHeight = 0.05f;
+
+    private bool flag;
+
+    private void Awake()
+    {
+        Scene scene = SceneManager.GetActiveScene();
+        if (scene.name == "Cooking") {
+            flag = true;
+        }
+    }
 
     private void Start()
     {
@@ -105,6 +116,8 @@ public class PlateController : MonoBehaviour
 
     void OnCollisionEnter(Collision other)
     {
+        if (flag) return;
+        
         IngredientInstance ingredient = other.gameObject.GetComponent<IngredientInstance>();
         if (ingredient != null && !ingredient.wasAddedToPlate)
         {
@@ -120,22 +133,6 @@ public class PlateController : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        IngredientInstance ingredient = other.GetComponent<IngredientInstance>();
-        if (ingredient != null && !ingredient.wasAddedToPlate)
-        {
-            if (TryAddIngredient(ingredient))
-            {
-                ingredient.wasAddedToPlate = true;
-                Debug.Log("Ingrediente agregado al plato exitosamente.");
-            }
-            else
-            {
-                Debug.Log("Ingrediente no compatible, no se agregó.");
-            }
-        }
-    }
 
     private void DestroyIngredients()
     {

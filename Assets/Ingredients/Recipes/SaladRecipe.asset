@@ -17,6 +17,6 @@ MonoBehaviour:
   ingredientsRequired:
   - ingredient: {fileID: 11400000, guid: 544b7a5c796ecbb4a8b8193680383aa8, type: 2}
     requiredState: Cortado
-    quantity: 4
+    quantity: 2
   isSpecialCombination: 0
   specialResultPrefab: {fileID: 3170102458957722091, guid: 442393218bcb14746ae60f7e10fb5bb4, type: 3}

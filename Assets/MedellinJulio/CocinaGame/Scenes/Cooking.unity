@@ -6395,11 +6395,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 8cf5a0988726e3f4e83ca7d0bd9cbf24, type: 3}
       propertyPath: m_LocalScale.x
-      value: 3
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8cf5a0988726e3f4e83ca7d0bd9cbf24, type: 3}
       propertyPath: m_LocalScale.y
-      value: 3
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8cf5a0988726e3f4e83ca7d0bd9cbf24, type: 3}
       propertyPath: m_LocalScale.z
@@ -6447,7 +6447,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8cf5a0988726e3f4e83ca7d0bd9cbf24, type: 3}
       propertyPath: m_ConstrainProportionsScale
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 8cf5a0988726e3f4e83ca7d0bd9cbf24, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -6904,7 +6904,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -11206,7 +11206,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4317070542815334769, guid: 32292c8cd1acc5e418e9dadbaafd4979, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.63
+      value: 1.795
       objectReference: {fileID: 0}
     - target: {fileID: 4317070542815334769, guid: 32292c8cd1acc5e418e9dadbaafd4979, type: 3}
       propertyPath: m_LocalPosition.z

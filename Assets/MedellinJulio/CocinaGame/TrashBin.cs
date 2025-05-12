@@ -5,7 +5,7 @@ public class TrashBin : MonoBehaviour
     
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag("Player") )
+        if (other.CompareTag("Ingredient") || other.CompareTag("Recipe") || other.CompareTag("Plate"))
         {
             Destroy(other.gameObject);
             Debug.Log($"{other.name} fue destruido por el bote de basura.");
