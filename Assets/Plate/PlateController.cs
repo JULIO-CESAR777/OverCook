@@ -41,13 +41,8 @@ public class PlateController : MonoBehaviour
 
     private void StackIngredient(IngredientInstance ingredientInstance)
     {
-        int ingredientIndex = stackingPoint.childCount;
 
-        ingredientInstance.transform.SetParent(stackingPoint);
-        Vector3 newPosition = Vector3.up * (stackHeight * ingredientIndex);
-
-        ingredientInstance.transform.localPosition = newPosition;
-        ingredientInstance.transform.localRotation = Quaternion.identity;
+        Debug.Log("Entro aqui");
 
         Rigidbody rb = ingredientInstance.GetComponent<Rigidbody>();
         if (rb != null)
@@ -57,14 +52,23 @@ public class PlateController : MonoBehaviour
         }
 
         Collider col = ingredientInstance.GetComponent<Collider>();
-        if (col != null)
+        if (col != null){
             col.enabled = false;
+            col.providesContacts = false;
+        }
 
         Grabbable grabbable = ingredientInstance.GetComponent<Grabbable>();
         if (grabbable != null)
             grabbable.enabled = false;
 
         ingredientInstance.canBePickedUp = false;
+
+        int ingredientIndex = stackingPoint.childCount;
+
+        ingredientInstance.transform.SetParent(stackingPoint);
+        Vector3 newPosition = Vector3.up * (stackHeight * ingredientIndex);
+        ingredientInstance.transform.localPosition = newPosition;
+        ingredientInstance.transform.localRotation = Quaternion.identity;
     }
 
     public void CheckRecipeCompletion()

@@ -245,7 +245,6 @@ public class PlayerInteractions : MonoBehaviour
             {
                 //Grab Ingredient
                 grabbingObject(currentInteractable);
-                currentInteractable = null;
             }
 
             //Accion cuando es un plato JULIOOOO
@@ -253,7 +252,6 @@ public class PlayerInteractions : MonoBehaviour
             {
                 //Grab Ingredient
                 grabbingPlate(currentInteractable);
-                currentInteractable = null;
             }
 
             // Acción cuando es un plato y el jugador tiene un ingrediente en mano
@@ -381,6 +379,7 @@ public class PlayerInteractions : MonoBehaviour
         obj.transform.localRotation = Quaternion.identity;
 
         grabObject = obj;
+        currentInteractable = null;
     }
 
     public void droppingObject(GameObject grabbedObject)
@@ -419,7 +418,7 @@ public class PlayerInteractions : MonoBehaviour
         if (ingredientInstance == null) return;
 
         // Verificar el estado del ingrediente antes de agregarlo
-        Debug.Log("Intentando agregar: " + ingredientInstance.ingredientData.ingredientName + " Estado: " + ingredientInstance.currentState);
+        //Debug.Log("Intentando agregar: " + ingredientInstance.ingredientData.ingredientName + " Estado: " + ingredientInstance.currentState);
         
         // Intentar añadirlo al plato, pasando el estado actual
         PlateController plateController = plate.GetComponent<PlateController>();
@@ -428,27 +427,6 @@ public class PlayerInteractions : MonoBehaviour
             return;
         }
 
-        // Si pasó la validación, colocarlo sobre el plato
-        grabObject.transform.SetParent(null);
-        Vector3 plateTop = plate.transform.position + Vector3.up * 0.1f;
-        grabObject.transform.position = plateTop;
-
-        Rigidbody rb = grabObject.GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            rb.isKinematic = true;
-            rb.detectCollisions = true;
-            rb.linearVelocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
-        }
-
-        Collider col = grabObject.GetComponent<Collider>();
-        if (col != null)
-        {
-            col.enabled = true;
-        }
-
-        grabObject.transform.SetParent(plate.transform); // para que se quede con el plato
         grabObject = null;
 
         // Restablecer el estado de la acción después de colocar el ingrediente en el plato

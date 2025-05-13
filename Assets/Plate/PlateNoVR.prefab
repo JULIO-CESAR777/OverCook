@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 2579354686149414386}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.072, z: 0}
+  m_LocalPosition: {x: 0, y: 0.155, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -138,22 +138,6 @@ MonoBehaviour:
   recipeCompleted: 0
   stackingPoint: {fileID: 2295482626924634362}
   stackHeight: 0.3
-  possibleRecipes:
-  - recipeName: SaladaChida
-    requiredIngredients:
-    - ingredientName: Tomato
-      requiredState: Cortado
-      quantity: 2
-    - ingredientName: Lettuce
-      requiredState: Cortado
-      quantity: 1
-    resultPrefab: {fileID: 1102718769189006761, guid: 0862413c71149914397b0d0fb538b68b, type: 3}
-  - recipeName: Carne
-    requiredIngredients:
-    - ingredientName: Lettuce
-      requiredState: Cortado
-      quantity: 2
-    resultPrefab: {fileID: 3170102458957722091, guid: 442393218bcb14746ae60f7e10fb5bb4, type: 3}
 --- !u!54 &7928328527237105591
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
+
     [Header("Input Actions")]
     [SerializeField] private InputActionAsset playerControls;
 
@@ -11,7 +12,9 @@ public class PlayerMovement : MonoBehaviour
     public float sprintSpeed = 10f;
     private float currentSpeed;
     private Vector2 moveInput;
-    private Rigidbody rb;
+    private CharacterController characterController;
+    private Vector3 velocity;
+    public float gravity = -9.81f;
 
     [Header("Camera")]
     [SerializeField] private Transform cameraHolder;
@@ -25,7 +28,7 @@ public class PlayerMovement : MonoBehaviour
 
     private Vector2 lookInput;
     private float verticalRotation = 0f;
-    
+
     [Header("Head Bobbing")]
     public float walkBobSpeed = 14f;
     public float walkBobAmount = 0.05f;
@@ -34,7 +37,7 @@ public class PlayerMovement : MonoBehaviour
 
     private float bobTimer = 0f;
     private Vector3 defaultCamLocalPos;
-    
+
     [Header("Footstep Sounds")]
     public AudioSource footstepSource;
     public AudioClip[] footstepClips;
@@ -43,7 +46,6 @@ public class PlayerMovement : MonoBehaviour
     public float sprintStepRate = 0.35f;
 
     private float footstepTimer = 0f;
-    
 
     // InputActions
     private InputAction moveAction;
@@ -53,9 +55,8 @@ public class PlayerMovement : MonoBehaviour
     private void Awake()
     {
         defaultCamLocalPos = cameraHolder.localPosition;
-        
-        rb = GetComponent<Rigidbody>();
-        
+        characterController = GetComponent<CharacterController>();
+
         var actionMap = playerControls.FindActionMap("Player");
         moveAction = actionMap.FindAction("Move");
         lookAction = actionMap.FindAction("Look");
@@ -63,7 +64,7 @@ public class PlayerMovement : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        
+
         normalFOV = playerCamera.fieldOfView;
     }
 
@@ -85,21 +86,22 @@ public class PlayerMovement : MonoBehaviour
     {
         moveInput = moveAction.ReadValue<Vector2>();
         lookInput = lookAction.ReadValue<Vector2>();
-        
+
         bool isSprinting = sprintAction.IsPressed();
         bool isMoving = moveInput.magnitude > 0.1f;
-        
+
         currentSpeed = isSprinting ? sprintSpeed : walkSpeed;
 
-        // Actualizar FOV suavemente
+        // FOV transition
         float sprintFOV = normalFOV + 20f;
         float targetFOV = isSprinting ? sprintFOV : normalFOV;
         playerCamera.fieldOfView = Mathf.Lerp(playerCamera.fieldOfView, targetFOV, Time.deltaTime * fovTransitionSpeed);
 
         HandleLook();
         HandleHeadBobbing(isMoving, isSprinting);
-        
-        if (isMoving && rb.linearVelocity.magnitude > 0.1f && footstepSource != null)
+        HandleMovement();
+
+        if (isMoving && characterController.velocity.magnitude > 0.1f && footstepSource != null && characterController.isGrounded)
         {
             footstepTimer += Time.deltaTime;
 
@@ -116,16 +118,20 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private void FixedUpdate()
-    {
-        HandleMovement();
-    }
-
     private void HandleMovement()
     {
         Vector3 moveDirection = new Vector3(moveInput.x, 0f, moveInput.y);
-        Vector3 moveVelocity = transform.TransformDirection(moveDirection) * currentSpeed;
-        rb.linearVelocity = new Vector3(moveVelocity.x, rb.linearVelocity.y, moveVelocity.z);
+        moveDirection = transform.TransformDirection(moveDirection);
+
+        // Aplicar gravedad
+        if (characterController.isGrounded && velocity.y < 0)
+        {
+            velocity.y = -2f; // Pequeño empuje hacia abajo para mantener contacto con el suelo
+        }
+        velocity.y += gravity * Time.deltaTime;
+
+        Vector3 fullMove = moveDirection * currentSpeed + new Vector3(0f, velocity.y, 0f);
+        characterController.Move(fullMove * Time.deltaTime);
     }
 
     private void HandleLook()
@@ -139,12 +145,11 @@ public class PlayerMovement : MonoBehaviour
         verticalRotation = Mathf.Clamp(verticalRotation, -maxLookAngle, maxLookAngle);
         cameraHolder.localRotation = Quaternion.Euler(verticalRotation, 0f, 0f);
     }
-    
+
     private void HandleHeadBobbing(bool isMoving, bool isSprinting)
     {
         if (!isMoving)
         {
-            // Volver suavemente a la posición original si no se mueve
             cameraHolder.localPosition = Vector3.Lerp(cameraHolder.localPosition, defaultCamLocalPos, Time.deltaTime * 5f);
             bobTimer = 0f;
             return;
@@ -155,12 +160,12 @@ public class PlayerMovement : MonoBehaviour
 
         bobTimer += Time.deltaTime * bobSpeed;
         float bobOffsetY = Mathf.Sin(bobTimer) * bobAmount;
-        float bobOffsetX = Mathf.Cos(bobTimer * 0.5f) * bobAmount * 0.5f; // opcional para balanceo lateral
+        float bobOffsetX = Mathf.Cos(bobTimer * 0.5f) * bobAmount * 0.5f;
 
         Vector3 targetPos = defaultCamLocalPos + new Vector3(bobOffsetX, bobOffsetY, 0f);
         cameraHolder.localPosition = targetPos;
     }
-    
+
     private void PlayFootstep()
     {
         if (footstepClips.Length == 0 || footstepSource == null) return;

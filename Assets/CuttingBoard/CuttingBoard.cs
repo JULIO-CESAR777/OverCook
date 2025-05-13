@@ -87,8 +87,6 @@ public class CuttingBoard : MonoBehaviour
         progress = 0;
         readyToCut = false;
         interactions.isDoingAnAction = false;
-        Debug.Log("Se cambio la accion en la tabla");
-
         
     }
 
