@@ -76,7 +76,7 @@ public class CuttingBoard : MonoBehaviour
         {
             rb.isKinematic = false;
             rb.detectCollisions = true;
-            rb.AddForce(Vector3.up * 2f, ForceMode.Impulse);
+            rb.AddForce(Vector3.up * 4f, ForceMode.Impulse);
         }
 
         // IMPORTANTE: Bloqueamos recoger temporalmente
