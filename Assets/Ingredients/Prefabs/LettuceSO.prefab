@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4252412276697730615}
   - component: {fileID: 8767806808040842639}
   - component: {fileID: 3728582867846700221}
-  - component: {fileID: -9110688237293519042}
+  - component: {fileID: -810386592575351274}
   m_Layer: 0
   m_Name: LettuceSO
   m_TagString: Ingredient
@@ -200,8 +200,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   lockHandOnGrab: 0
---- !u!65 &-9110688237293519042
-BoxCollider:
+--- !u!64 &-810386592575351274
+MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -218,6 +218,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1.1045198, y: 0.8205186, z: 1.1334}
-  m_Center: {x: 0, y: 0.40009022, z: -0.051828653}
+  serializedVersion: 5
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 599530405527473323, guid: b039d95d3bcc1eb449d9fca62de651e0, type: 3}

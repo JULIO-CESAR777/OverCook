@@ -62,9 +62,12 @@ public class CuttingBoard : MonoBehaviour
         if (collider != null && ingredientOnBoard.cutMesh != null)
         {
             // Actualizar el MeshCollider
+            collider.enabled = false;
+            collider.sharedMesh = null;
+
             collider.sharedMesh = ingredientOnBoard.cutMesh;
+            collider.convex = true; // Si lo necesitas, especialmente si el objeto se mueve o colisiona
             collider.enabled = true;
-            collider.providesContacts = true;
         }
         
         ingredientOnBoard.transform.SetParent(null);
