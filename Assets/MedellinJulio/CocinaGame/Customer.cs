@@ -256,7 +256,7 @@ public class Customer : MonoBehaviour
         //Debug.Log("Entre a colisionar");
         if (other.CompareTag("Recipe") && esperanding)
         {
-            //Debug.Log("Entre en lka instancia");
+            Debug.Log("Entre en lka instancia");
            
            ServeOrder(other.gameObject);
             

@@ -237,7 +237,10 @@ public class PlayerInteractions : MonoBehaviour
             if(currentInteractable.CompareTag(interactTag[0])){
                 if(isDoingAnAction) return;
                 var interactable = currentInteractable.GetComponent<IngredientSpawner>();
+               
                 interactable?.SpawnIngredient();
+           
+         
             }
             
             //Accion cuando es un ingrediente
@@ -288,7 +291,7 @@ public class PlayerInteractions : MonoBehaviour
 
             }
 
-            if (currentInteractable.CompareTag(interactTag[6]))
+            if (currentInteractable != null && currentInteractable.CompareTag(interactTag[6]))
             {
                 if (isDoingAnAction) return;
                 var interactable = currentInteractable.GetComponent<SpawnerPlates>();

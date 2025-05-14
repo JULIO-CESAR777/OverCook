@@ -14,6 +14,9 @@ public class IngredientInstance : MonoBehaviour
     public Mesh cookMesh;
     //public List<MeshCollider> meshCollider;
 
+    [Header("Quemado")]
+    public Mesh burnedMesh;
+
     public void Setup(IngredientSO data, string state)
     {
         ingredientData = data;

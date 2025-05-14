@@ -12,6 +12,7 @@ TagManager:
   - Recipe
   - Customer
   - SpawnerPlates
+  - Sarten
   layers:
   - Default
   - TransparentFX
