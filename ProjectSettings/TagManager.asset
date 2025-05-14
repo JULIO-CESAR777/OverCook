@@ -12,6 +12,9 @@ TagManager:
   - Recipe
   - Customer
   - SpawnerPlates
+  - Pan
+  - Stove
+  - Quemador
   - Sarten
   layers:
   - Default

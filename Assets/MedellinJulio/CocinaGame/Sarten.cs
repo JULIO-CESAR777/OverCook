@@ -5,13 +5,14 @@ using UnityEngine.SceneManagement;
 
 public class Sarten : MonoBehaviour
 {
-    [Header("IngredienteTema")]
+    [Header("Ingrediente Tema")]
     public IngredientInstance ingredientOnPan;
-    public bool dentro;
+    
+    //public bool dentro;
     public Transform stackingPoint;
     public bool readyToCook;
 
-    [Header("JaladodeIngrediente")]
+    [Header("Jalado de Ingrediente")]
     public List<IngredientInstance> currentIngredients = new List<IngredientInstance>();
     public bool CookCompleted;
 
@@ -20,8 +21,7 @@ public class Sarten : MonoBehaviour
     private bool flag;
 
     public float progress;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-
+    
 
     public void Start()
     {
@@ -32,26 +32,20 @@ public class Sarten : MonoBehaviour
         }
     }
 
-    void Update()
-    {
-        if (onStove && readyToCook && ingredientOnPan != null && ingredientOnPan.canCook)
-        {
-            cookIngredient(FindObjectOfType<PlayerInteractions>());
-        }
-    }
+    
 
     public bool TryAddIngredient(IngredientInstance ingredient)
     {
         if (ingredient.currentState == "Crudo")
         {
-            Debug.Log("Ingrediente crudo aceptado en el sartén");
+            //Debug.Log("Ingrediente crudo aceptado en el sartï¿½n");
             ingredient.transform.SetParent(stackingPoint.transform);
             ingredientOnPan = ingredient;
             readyToCook = true;
             return true;
         }
 
-        Debug.Log("Ingrediente no está crudo. Estado actual: " + ingredient.currentState);
+        //Debug.Log("Ingrediente no estï¿½ crudo. Estado actual: " + ingredient.currentState);
         return false;
     }
 
@@ -86,11 +80,11 @@ public class Sarten : MonoBehaviour
         // Cambiar el estado del ingrediente a "Cortado"
         ingredientOnPan.currentState = "Cocinado";
 
-        // Cambiar el MeshRenderer y MeshFilter para mostrar la versión cortada
+        // Cambiar el MeshRenderer y MeshFilter para mostrar la versiï¿½n cortada
         MeshRenderer renderer = ingredientOnPan.GetComponent<MeshRenderer>();
         if (renderer != null && ingredientOnPan.cutMesh != null)
         {
-            // Aplicar la nueva malla (si está disponible)
+            // Aplicar la nueva malla (si estï¿½ disponible)
             MeshFilter filter = ingredientOnPan.GetComponent<MeshFilter>();
             if (filter != null)
             {
@@ -171,7 +165,7 @@ public class Sarten : MonoBehaviour
             }
             else
             {
-                Debug.Log("Ingrediente no compatible, no se agregó.");
+                Debug.Log("Ingrediente no compatible, no se agregï¿½.");
             }
         }
     }

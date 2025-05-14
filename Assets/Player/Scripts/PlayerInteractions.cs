@@ -58,14 +58,18 @@ public class PlayerInteractions : MonoBehaviour
 
     private void OnEnable()
     {
-        interactAction.action.performed += OnInteract;
-        interactAction.action.Enable();
+        if(interactAction != null){
+            interactAction.action.performed += OnInteract;
+            interactAction.action.Enable();
+        }
     }
 
     private void OnDisable()
     {
-        interactAction.action.performed -= OnInteract;
-        interactAction.action.Disable();
+        if(interactAction != null){
+            interactAction.action.performed -= OnInteract;
+            interactAction.action.Disable();
+        }
     }
 
     private void Start()
@@ -197,7 +201,7 @@ public class PlayerInteractions : MonoBehaviour
 
         if (bestTarget.CompareTag(interactTag[3]))
         {
-            if (isDoingAnAction || bestTarget.gameObject.GetComponent<CuttingBoard>().ingredientOnBoard != null)
+            if (isDoingAnAction && grabObject.CompareTag(interactTag[1]) || bestTarget.gameObject.GetComponent<CuttingBoard>().ingredientOnBoard != null)
             {
                 currentInteractable = bestTarget.gameObject;
                 interfaceText.text = "Press F to cut";
@@ -206,7 +210,7 @@ public class PlayerInteractions : MonoBehaviour
             }
         }
 
-        if (bestTarget.CompareTag(interactTag[5]) && isDoingAnAction && grabObject.CompareTag("Recipe"))
+        if (bestTarget.CompareTag(interactTag[5]) && isDoingAnAction && grabObject.CompareTag(interactTag[4]))
         {
             currentInteractable = bestTarget.gameObject;
             interfaceText.text = "Press F to give";
@@ -222,19 +226,24 @@ public class PlayerInteractions : MonoBehaviour
             return;
         }
 
-        if (bestTarget.CompareTag(interactTag[7]) && isDoingAnAction && grabObject.CompareTag("Ingredient"))
-        {
+        //Detecta la sarten y no tiene nada en la mano
+        if(bestTarget.CompareTag(interactTag[7]) && !isDoingAnAction){
             currentInteractable = bestTarget.gameObject;
-            interfaceText.text = "Press F to place ingredient";
-                
+            interfaceText.text = "Press F to grab";
             textInteractions.SetActive(true);
             return;
         }
 
-        if (bestTarget.CompareTag(interactTag[7]) && !isDoingAnAction)
-        {
+        if(bestTarget.CompareTag(interactTag[7]) && isDoingAnAction && grabObject != null && grabObject.CompareTag(interactTag[1])){
             currentInteractable = bestTarget.gameObject;
-            interfaceText.text = "Press F to grab";
+            interfaceText.text = "Press F to put ingredient";
+            textInteractions.SetActive(true);
+            return;
+        }
+
+        if(bestTarget.CompareTag(interactTag[8]) && isDoingAnAction && grabObject != null && grabObject.CompareTag(interactTag[7])){
+            currentInteractable = bestTarget.gameObject;
+            interfaceText.text = "Press F to cook";
             textInteractions.SetActive(true);
             return;
         }
@@ -244,6 +253,7 @@ public class PlayerInteractions : MonoBehaviour
         textInteractions.SetActive(false);
 
     }
+
 
     private void OnInteract(InputAction.CallbackContext context)
     {
@@ -257,7 +267,6 @@ public class PlayerInteractions : MonoBehaviour
                
                 interactable?.SpawnIngredient();
            
-         
             }
             
             //Accion cuando es un ingrediente
@@ -271,7 +280,7 @@ public class PlayerInteractions : MonoBehaviour
             if (currentInteractable.CompareTag(interactTag[2]) && !isDoingAnAction)
             {
                 //Grab Ingredient
-                grabbingPlate(currentInteractable);
+                grabbingObject(currentInteractable);
             }
 
             // Acción cuando es un plato y el jugador tiene un ingrediente en mano
@@ -295,17 +304,12 @@ public class PlayerInteractions : MonoBehaviour
 
             if(currentInteractable != null && currentInteractable.CompareTag(interactTag[4]) && !isDoingAnAction)
             {
-
-                grabbingPlate(currentInteractable);
-                currentInteractable = null;
+                grabbingObject(currentInteractable);
             }
 
-            if(currentInteractable != null && currentInteractable.CompareTag(interactTag[5]) && grabObject.CompareTag("Recipe") && isDoingAnAction)
+            if(currentInteractable != null  && grabObject != null && currentInteractable.CompareTag(interactTag[5]) && grabObject.CompareTag(interactTag[4]) && isDoingAnAction)
             {
                 giveOrder();
-                currentInteractable = null;
-
-
             }
 
             if (currentInteractable != null && currentInteractable.CompareTag(interactTag[6]))
@@ -315,17 +319,29 @@ public class PlayerInteractions : MonoBehaviour
                 interactable?.SpawnPlate();
             }
 
-            if (currentInteractable != null && currentInteractable.CompareTag(interactTag[7]) && isDoingAnAction  && grabObject.CompareTag("Ingredient"))
-            {
-                PlaceIngredientOnPan(currentInteractable);
-                currentInteractable = null;
-            }
-
-
+            // SARTEN
             if (currentInteractable != null && currentInteractable.CompareTag(interactTag[7]) && !isDoingAnAction)
             { 
-                grabbingPan(currentInteractable);
+                grabbingObject(currentInteractable);
             }
+
+            if (currentInteractable != null && grabObject != null && currentInteractable.CompareTag(interactTag[7]) && isDoingAnAction  && grabObject.CompareTag(interactTag[1]))
+            {
+                PlaceIngredientOnPan();
+            }
+
+            // Horno
+            if(currentInteractable != null && currentInteractable.CompareTag(interactTag[8]) && isDoingAnAction && grabObject.CompareTag(interactTag[7])){
+                stove stoveScript = currentInteractable.GetComponent<stove>();
+                if (stoveScript != null)
+                {
+                    stoveScript.addPanToStove(grabObject);
+                    grabObject = null;
+                    isDoingAnAction = false;
+                    textInteractions.SetActive(false);
+                }
+            }
+
         }
         //Comprobacion cuando se quiere soltar un objeto
         else if(currentInteractable == null && isDoingAnAction )
@@ -336,42 +352,13 @@ public class PlayerInteractions : MonoBehaviour
     }
 
 
-    public void grabbingPan(GameObject grabbedObject)
-    {
-        if (grabObject != null) return; // Ya tienes algo agarrado
-
-        
-       
-
-
-        StartCoroutine(MoveToHand(grabbedObject));
-
-    }
-
     public void grabbingObject(GameObject grabbedObject)
     {
         if (grabObject != null) return; // Ya tienes algo agarrado
 
-        IngredientInstance ingredient = grabbedObject.GetComponent<IngredientInstance>();
-        if (ingredient != null && !ingredient.canBePickedUp)
-        {
-            // Todavía no se puede recoger
-            return;
-        }
-        
-
         StartCoroutine(MoveToHand(grabbedObject));
-        
     }
 
-    public void grabbingPlate(GameObject grabbedObject)
-    {
-        if (grabObject != null) return;
-       
-
-        StartCoroutine(MoveToHand(grabbedObject));
-
-    }
     private IEnumerator MoveToHand(GameObject obj)
     {
 
@@ -512,7 +499,7 @@ public class PlayerInteractions : MonoBehaviour
          
     }
 
-    public void PlaceIngredientOnPan(GameObject pan)
+    public void PlaceIngredientOnPan()
     {
 
         if (grabObject == null)
@@ -528,16 +515,16 @@ public class PlayerInteractions : MonoBehaviour
             return;
         }
 
-        if (pan == null)
+        if (currentInteractable == null)
         {
             Debug.LogError("El GameObject 'pan' es null.");
             return;
         }
 
-        Sarten panScript = pan.GetComponent<Sarten>();
+        Sarten panScript = currentInteractable.GetComponent<Sarten>();
         if (panScript == null)
         {
-            Debug.LogError("El objeto con nombre '" + pan.name + "' no tiene el componente 'Sarten'.");
+            Debug.LogError("El objeto con nombre '" + currentInteractable.name + "' no tiene el componente 'Sarten'.");
             return;
         }
 
@@ -567,6 +554,8 @@ public class PlayerInteractions : MonoBehaviour
 
             grabObject = null;
             isDoingAnAction = false;
+
+            currentInteractable = null;
         }
     }
 
@@ -578,15 +567,12 @@ public class PlayerInteractions : MonoBehaviour
 
         bool flag;
 
-        
-
         Customer cliente = currentInteractable.GetComponent<Customer>();
 
         flag = cliente.ServeOrder(grabObject);
 
         if (flag)
         {
-
             grabObject.transform.SetParent(null);
             Destroy(grabObject.gameObject);
             grabObject = null;
@@ -597,7 +583,9 @@ public class PlayerInteractions : MonoBehaviour
             
         }
 
+        currentInteractable = null;
     }
+
 
     private void OnDrawGizmos()
     {
@@ -613,7 +601,5 @@ public class PlayerInteractions : MonoBehaviour
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(mainCamera.transform.position, 0.5f);
     }
-
-
 
 }
