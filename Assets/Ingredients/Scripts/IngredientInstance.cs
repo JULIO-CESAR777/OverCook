@@ -7,6 +7,7 @@ public class IngredientInstance : MonoBehaviour
     public string currentState;
     public bool canBePickedUp = true;
     public bool wasAddedToPlate = false;
+    public bool canCook;
     [Header("Corte")]
     public Mesh cutMesh;
 

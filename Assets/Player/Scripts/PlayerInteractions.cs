@@ -222,6 +222,23 @@ public class PlayerInteractions : MonoBehaviour
             return;
         }
 
+        if (bestTarget.CompareTag(interactTag[7]) && isDoingAnAction && grabObject.CompareTag("Ingredient"))
+        {
+            currentInteractable = bestTarget.gameObject;
+            interfaceText.text = "Press F to place ingredient";
+                
+            textInteractions.SetActive(true);
+            return;
+        }
+
+        if (bestTarget.CompareTag(interactTag[7]) && !isDoingAnAction)
+        {
+            currentInteractable = bestTarget.gameObject;
+            interfaceText.text = "Press F to grab";
+            textInteractions.SetActive(true);
+            return;
+        }
+
         // Si nada coincide
         currentInteractable = null;
         textInteractions.SetActive(false);
@@ -298,6 +315,17 @@ public class PlayerInteractions : MonoBehaviour
                 interactable?.SpawnPlate();
             }
 
+            if (currentInteractable != null && currentInteractable.CompareTag(interactTag[7]) && isDoingAnAction  && grabObject.CompareTag("Ingredient"))
+            {
+                PlaceIngredientOnPan(currentInteractable);
+                currentInteractable = null;
+            }
+
+
+            if (currentInteractable != null && currentInteractable.CompareTag(interactTag[7]) && !isDoingAnAction)
+            { 
+                grabbingPan(currentInteractable);
+            }
         }
         //Comprobacion cuando se quiere soltar un objeto
         else if(currentInteractable == null && isDoingAnAction )
@@ -307,7 +335,19 @@ public class PlayerInteractions : MonoBehaviour
         
     }
 
-    
+
+    public void grabbingPan(GameObject grabbedObject)
+    {
+        if (grabObject != null) return; // Ya tienes algo agarrado
+
+        
+       
+
+
+        StartCoroutine(MoveToHand(grabbedObject));
+
+    }
+
     public void grabbingObject(GameObject grabbedObject)
     {
         if (grabObject != null) return; // Ya tienes algo agarrado
@@ -470,6 +510,64 @@ public class PlayerInteractions : MonoBehaviour
         // Restablecer el estado de la acción después de colocar el ingrediente en el plato
         isDoingAnAction = false;
          
+    }
+
+    public void PlaceIngredientOnPan(GameObject pan)
+    {
+
+        if (grabObject == null)
+        {
+            Debug.LogWarning("No hay objeto en la mano.");
+            return;
+        }
+
+        IngredientInstance ingredientInstance = grabObject.GetComponent<IngredientInstance>();
+        if (ingredientInstance == null)
+        {
+            Debug.LogWarning("El objeto agarrado no tiene IngredientInstance.");
+            return;
+        }
+
+        if (pan == null)
+        {
+            Debug.LogError("El GameObject 'pan' es null.");
+            return;
+        }
+
+        Sarten panScript = pan.GetComponent<Sarten>();
+        if (panScript == null)
+        {
+            Debug.LogError("El objeto con nombre '" + pan.name + "' no tiene el componente 'Sarten'.");
+            return;
+        }
+
+        if (grabObject == null) return;
+
+       
+
+        // Intenta agregarlo al sartén
+        if (panScript.TryAddIngredient(ingredientInstance))
+        {
+            // Posicionar el ingrediente en el punto de apilamiento
+            grabObject.transform.SetParent(panScript.stackingPoint);
+            grabObject.transform.localPosition = Vector3.zero;
+            grabObject.transform.localRotation = Quaternion.identity;
+
+            Collider col = grabObject.GetComponent<Collider>();
+            if (col != null) col.enabled = false;
+
+            Rigidbody rb = grabObject.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.isKinematic = true;
+                rb.detectCollisions = false;
+            }
+
+            ingredientInstance.wasAddedToPlate = true;
+
+            grabObject = null;
+            isDoingAnAction = false;
+        }
     }
 
     //Julio

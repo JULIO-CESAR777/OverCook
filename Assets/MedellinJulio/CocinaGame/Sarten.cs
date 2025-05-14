@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Sarten : MonoBehaviour
 {
@@ -15,25 +16,48 @@ public class Sarten : MonoBehaviour
     public bool CookCompleted;
 
 
+    public bool onStove = false;
+    private bool flag;
+
     public float progress;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-   
+
+
+    public void Start()
+    {
+        Scene scene = SceneManager.GetActiveScene();
+        if (scene.name == "Cooking")
+        {
+            flag = true;
+        }
+    }
+
+    void Update()
+    {
+        if (onStove && readyToCook && ingredientOnPan != null && ingredientOnPan.canCook)
+        {
+            cookIngredient(FindObjectOfType<PlayerInteractions>());
+        }
+    }
 
     public bool TryAddIngredient(IngredientInstance ingredient)
     {
         if (ingredient.currentState == "Crudo")
         {
+            Debug.Log("Ingrediente crudo aceptado en el sartén");
             ingredient.transform.SetParent(stackingPoint.transform);
             ingredientOnPan = ingredient;
             readyToCook = true;
             return true;
         }
+
+        Debug.Log("Ingrediente no está crudo. Estado actual: " + ingredient.currentState);
         return false;
     }
 
     public void cookIngredient(PlayerInteractions interactions)
     {
-
+        if (ingredientOnPan.currentState != "Crudo") return;
         if (!readyToCook) return;
         if (ingredientOnPan == null) return;
         progress += 100f * Time.deltaTime;
@@ -56,8 +80,11 @@ public class Sarten : MonoBehaviour
     {
         if (ingredientOnPan == null) return;
 
+        if (ingredientOnPan.cookMesh == null) return;
+
+
         // Cambiar el estado del ingrediente a "Cortado"
-        ingredientOnPan.currentState = "Cortado";
+        ingredientOnPan.currentState = "Cocinado";
 
         // Cambiar el MeshRenderer y MeshFilter para mostrar la versión cortada
         MeshRenderer renderer = ingredientOnPan.GetComponent<MeshRenderer>();
@@ -108,7 +135,14 @@ public class Sarten : MonoBehaviour
 
     public void BurntCook(PlayerInteractions interactions)
     {
+        if (ingredientOnPan == null) return;
 
+        ingredientOnPan.currentState = "Quemado";
+        ingredientOnPan.GetComponent<Renderer>().material.color = Color.black; // efecto simple
+        ingredientOnPan.transform.SetParent(null);
+        progress = 0;
+        readyToCook = false;
+        interactions.isDoingAnAction = false;
 
     }
 
@@ -123,12 +157,22 @@ public class Sarten : MonoBehaviour
             instance.canBePickedUp = true; // O cualquier sistema que uses para permitir agarrar
         }
     }
-    public void OnTriggerEnter(Collider other)
+    void OnCollisionEnter(Collision other)
     {
-        if (other.CompareTag("Ingredient"))
-        {
+        if (flag) return;
 
-            dentro = true;
+        IngredientInstance ingredient = other.gameObject.GetComponent<IngredientInstance>();
+        if (ingredient != null && !ingredient.wasAddedToPlate)
+        {
+            if (TryAddIngredient(ingredient))
+            {
+                ingredient.wasAddedToPlate = true;
+                Debug.Log("Ingrediente agregado al plato exitosamente.");
+            }
+            else
+            {
+                Debug.Log("Ingrediente no compatible, no se agregó.");
+            }
         }
     }
 }
