@@ -1691,11 +1691,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 71eda0ed9219833499db733df16ec16b, type: 3}
---- !u!4 &411877765 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 3190760322391270665, guid: fd31bfcc0bbd8ec4681efe3193b9e80c, type: 3}
-  m_PrefabInstance: {fileID: 4198389845667087782}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &412287195
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5958,6 +5953,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1067493507}
+  - component: {fileID: 1067493509}
+  - component: {fileID: 1067493508}
   m_Layer: 0
   m_Name: Quemador2
   m_TagString: Quemador
@@ -5974,12 +5971,48 @@ Transform:
   m_GameObject: {fileID: 1067493506}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.49, y: 1.245, z: 0.5}
+  m_LocalPosition: {x: -0.49, y: 1.25, z: 0.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6889104953405680672}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1067493508
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1067493506}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.1, y: 0.1, z: 0.1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1067493509
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1067493506}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10d7e3a18f1df6c458285999edd015e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isOccupied: 0
+  currentPan: {fileID: 0}
+  cookingTime: 5
 --- !u!1 &1094325469
 GameObject:
   m_ObjectHideFlags: 0
@@ -10598,6 +10631,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1741706552}
+  - component: {fileID: 1741706554}
+  - component: {fileID: 1741706553}
   m_Layer: 0
   m_Name: Quemador1
   m_TagString: Quemador
@@ -10614,12 +10649,48 @@ Transform:
   m_GameObject: {fileID: 1741706551}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.49, y: 1.245, z: 0.5}
+  m_LocalPosition: {x: 0.49, y: 1.25, z: 0.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6889104953405680672}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1741706553
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1741706551}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.1, y: 0.1, z: 0.1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1741706554
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1741706551}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10d7e3a18f1df6c458285999edd015e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isOccupied: 0
+  currentPan: {fileID: 0}
+  cookingTime: 5
 --- !u!1001 &1745194863
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14195,7 +14266,7 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &3515248613200561767
+--- !u!114 &3515248613200561774
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -14204,16 +14275,62 @@ MonoBehaviour:
   m_GameObject: {fileID: 877252795059557243}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3b5af2f8ff23aeb4fba746cf1beb42ea, type: 3}
+  m_Script: {fileID: 11500000, guid: 822bc9090447b9c40833509c4a32e597, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ingredientOnPan: {fileID: 0}
-  stackingPoint: {fileID: 411877765}
-  readyToCook: 0
-  currentIngredients: []
-  CookCompleted: 0
-  onStove: 0
-  progress: 0
+  ignoreMe: 0
+  body: {fileID: 0}
+  hightlightMaterial: {fileID: 0}
+  isGrabbable: 1
+  CopySettings: {fileID: 0}
+  grabType: 0
+  handType: 0
+  singleHandOnly: 0
+  instantGrab: 0
+  useGentleGrab: 0
+  maintainGrabOffset: 0
+  parentOnGrab: 1
+  heldNoFriction: 1
+  ignoreWeight: 0
+  allowHeldSwapping: 1
+  throwPower: 1
+  jointBreakForce: 3500
+  showAdvancedSettings: 1
+  makeChildrenGrabbable: 1
+  grabPriorityWeight: 1
+  ignoreReleaseTime: 0.5
+  minHeldDrag: 1.5
+  minHeldAngleDrag: 3
+  maxHeldVelocity: 10
+  heldPositionOffset: {x: 0, y: 0, z: 0}
+  heldRotationOffset: {x: 0, y: 0, z: 0}
+  customGrabJoint: {fileID: 0}
+  jointedBodies: []
+  heldIgnoreColliders: []
+  pullApartBreakOnly: 1
+  showEvents: 1
+  onGrab:
+    m_PersistentCalls:
+      m_Calls: []
+  onRelease:
+    m_PersistentCalls:
+      m_Calls: []
+  onSqueeze:
+    m_PersistentCalls:
+      m_Calls: []
+  onUnsqueeze:
+    m_PersistentCalls:
+      m_Calls: []
+  onHighlight:
+    m_PersistentCalls:
+      m_Calls: []
+  onUnhighlight:
+    m_PersistentCalls:
+      m_Calls: []
+  OnJointBreak:
+    m_PersistentCalls:
+      m_Calls: []
+  lockHandOnGrab: 0
 --- !u!23 &3571398466779239592
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -14411,17 +14528,13 @@ PrefabInstance:
       propertyPath: m_Name
       value: Sarten
       objectReference: {fileID: 0}
-    - target: {fileID: 6870493215974740102, guid: fd31bfcc0bbd8ec4681efe3193b9e80c, type: 3}
-      propertyPath: m_TagString
-      value: Pan
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 6870493215974740102, guid: fd31bfcc0bbd8ec4681efe3193b9e80c, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 3515248613200561767}
+      addedObject: {fileID: 3515248613200561774}
   m_SourcePrefab: {fileID: 100100000, guid: fd31bfcc0bbd8ec4681efe3193b9e80c, type: 3}
 --- !u!1001 &4245502892752033800
 PrefabInstance:
@@ -15297,7 +15410,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce13e83b55a59c34bbf3aabb6cf6faae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  quemadores: []
+  burnerList: []
   steamEffectPrefab: {fileID: 0}
 --- !u!64 &7508872639519007623
 MeshCollider:

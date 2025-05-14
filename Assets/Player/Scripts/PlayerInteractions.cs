@@ -335,7 +335,7 @@ public class PlayerInteractions : MonoBehaviour
                 stove stoveScript = currentInteractable.GetComponent<stove>();
                 if (stoveScript != null)
                 {
-                    stoveScript.addPanToStove(grabObject);
+                    stoveScript.AddPanToStove(grabObject);
                     grabObject = null;
                     isDoingAnAction = false;
                     textInteractions.SetActive(false);
@@ -355,6 +355,20 @@ public class PlayerInteractions : MonoBehaviour
     public void grabbingObject(GameObject grabbedObject)
     {
         if (grabObject != null) return; // Ya tienes algo agarrado
+        
+        // Si estaba sobre un quemador, liberar el slot
+        Collider[] overlapped = Physics.OverlapSphere(grabbedObject.transform.position, 0.2f);
+        foreach (Collider col in overlapped)
+        {
+            Burner burner = col.GetComponent<Burner>();
+            if (burner != null && burner.currentPan == grabbedObject)
+            {
+                burner.currentPan = null;
+                burner.isOccupied = false;
+                Debug.Log("Sartén retirada manualmente del quemador.");
+                break;
+            }
+        }
 
         StartCoroutine(MoveToHand(grabbedObject));
     }

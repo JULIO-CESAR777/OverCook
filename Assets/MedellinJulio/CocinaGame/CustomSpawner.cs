@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CustomerSpawner : MonoBehaviour
 {
-    [Header("Configuración")]
+    [Header("Configuraciï¿½n")]
     public GameObject customerPrefab;
     public Transform[] queuePositions; // 0 = barra, el resto = fila
     public float spawnDelay = 5f;
@@ -30,7 +30,7 @@ public class CustomerSpawner : MonoBehaviour
     {
         if (customerQueue.Count >= queuePositions.Length)
         {
-            Debug.Log("Fila llena, no se puede spawnear otro cliente.");
+            //Debug.Log("Fila llena, no se puede spawnear otro cliente.");
             return;
         }
 
