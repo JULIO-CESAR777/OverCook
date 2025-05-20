@@ -1,53 +1,77 @@
 using UnityEngine;
-using System.Collections;
 
 public class CuttingBoard : MonoBehaviour
 {
+    [Header("Cutting Settings")]
+    public float cutSpeed = 100f; // Speed at which cutting progresses
+    public Vector3 cutIngredientScale = new Vector3(1.3f, 1.6f, 1.3f); // Scale after cutting
+    public float popUpForce = 2f; // Force applied when cutting is complete
+    public float positionAdjustment = 0.1f; // Vertical adjustment after cutting
 
-    public IngredientInstance ingredientOnBoard;
-    public float progress;
-    public bool readyToCut = false;
-
+    [Header("References")]
     public Animator knifeAnimator;
-    void Awake()
+    public IngredientInstance ingredientOnBoard;
+
+    [Header("State")]
+    [SerializeField] private float progress;
+    [SerializeField] private bool isReadyToCut = false;
+
+    private void Awake()
     {
         progress = 0;
     }
-    public bool TryAddIngredient(IngredientInstance ingredient){
-        if(ingredient.currentState == "Crudo"){
-            ingredientOnBoard = ingredient;
-            readyToCut = true;
-            return true;
+
+    public bool TryAddIngredient(IngredientInstance ingredient)
+    {
+        if (ingredient == null || ingredient.currentState != "Crudo") return false;
+
+        ingredientOnBoard = ingredient;
+        isReadyToCut = true;
+
+        // Prepare ingredient for cutting
+        ingredient.transform.SetParent(transform);
+        ingredient.transform.localPosition = Vector3.up * 0.2f;
+        ingredient.transform.localRotation = Quaternion.identity;
+
+        // Disable physics while on board
+        Rigidbody rb = ingredient.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.isKinematic = true;
+            rb.detectCollisions = false;
         }
-        return false;
+
+        Collider col = ingredient.GetComponent<Collider>();
+        if (col != null) col.enabled = false;
+
+        return true;
     }
 
-    public void cutIngredient(PlayerInteractions interactions){
+    public void ProcessCutting()
+    {
+        if (!isReadyToCut || ingredientOnBoard == null) return;
 
-        if(!readyToCut) return;
-        if (ingredientOnBoard == null) return;
-        progress += 100f * Time.deltaTime;
+        progress += cutSpeed * Time.deltaTime;
+        PlayCutAnimation();
 
-        AnimacionCortar();
         if (progress >= 100)
         {
-            
-            CompleteCut(interactions);
+            CompleteCut();
         }
     }
 
-    private void CompleteCut(PlayerInteractions interactions)
+    private void CompleteCut()
     {
         if (ingredientOnBoard == null) return;
 
-        // 1. Cambiar la malla visual
+        // Update visual mesh
         MeshFilter filter = ingredientOnBoard.GetComponent<MeshFilter>();
         if (filter != null && ingredientOnBoard.cutMesh != null)
         {
             filter.mesh = ingredientOnBoard.cutMesh;
         }
 
-        // 2. Configurar el collider ANTES de cambiar la escala
+        // Update collider
         MeshCollider collider = ingredientOnBoard.GetComponent<MeshCollider>();
         if (collider != null && ingredientOnBoard.cutMesh != null)
         {
@@ -56,45 +80,58 @@ public class CuttingBoard : MonoBehaviour
             collider.enabled = true;
         }
 
-        // 3. Ajustar escala (opcional, pero si lo necesitas)
-        ingredientOnBoard.transform.localScale = Vector3.one; // Resetear primero
-        ingredientOnBoard.transform.localScale = new Vector3(1.3f, 1.6f, 1.3f);
+        // Adjust scale
+        ingredientOnBoard.transform.localScale = Vector3.one; // Reset first
+        ingredientOnBoard.transform.localScale = cutIngredientScale;
 
-        // 4. Recalcular bounds del collider
+        // Refresh collider
         if (collider != null)
         {
             collider.enabled = false;
             collider.enabled = true;
         }
 
-        // 5. Configurar física
+        // Enable physics
         Rigidbody rb = ingredientOnBoard.GetComponent<Rigidbody>();
         if (rb != null)
         {
             rb.isKinematic = false;
             rb.detectCollisions = true;
-            rb.AddForce(Vector3.up * 2f, ForceMode.Impulse); // Fuerza más suave
+            rb.AddForce(Vector3.up * popUpForce, ForceMode.Impulse);
         }
 
-        // 6. Configurar para poder agarrarlo
+        // Update ingredient state
         ingredientOnBoard.currentState = "Cortado";
         ingredientOnBoard.canBeCut = false;
-        ingredientOnBoard.canBePickedUp = true; // Permitir agarrar inmediatamente
+        ingredientOnBoard.canBePickedUp = true;
 
-        // 7. Ajustar posición para mejor detección
-        ingredientOnBoard.transform.position += Vector3.up * 0.1f; // Pequeño ajuste vertical
+        // Adjust position for better interaction
+        ingredientOnBoard.transform.position += Vector3.up * positionAdjustment;
 
-        // 8. Limpiar referencia
+        // Reset board state
+        ingredientOnBoard.transform.SetParent(null);
         ingredientOnBoard = null;
         progress = 0;
-        readyToCut = false;
-        interactions.isDoingAnAction = false;
-
+        isReadyToCut = false;
     }
 
-    public void AnimacionCortar()
+    private void PlayCutAnimation()
     {
-        knifeAnimator.SetTrigger("Cut");
+        if (knifeAnimator != null)
+        {
+            knifeAnimator.SetTrigger("Cut");
+        }
     }
 
+    // Visual feedback for when the player looks at the board
+    public void ShowCuttingProgress()
+    {
+        // You could implement a UI progress bar here if needed
+    }
+
+    // Called when the player stops cutting
+    public void InterruptCutting()
+    {
+        // Could add partial cutting effects here
+    }
 }

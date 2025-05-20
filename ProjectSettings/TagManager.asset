@@ -16,6 +16,8 @@ TagManager:
   - Stove
   - Quemador
   - Sarten
+  - Spawner
+  - Environment
   layers:
   - Default
   - TransparentFX

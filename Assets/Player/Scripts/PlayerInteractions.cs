@@ -73,7 +73,7 @@ public class PlayerInteractions : MonoBehaviour
             if (cuttingBoard != null && cuttingBoard.ingredientOnBoard != null && cuttingBoard.ingredientOnBoard.canBeCut)
             {
                 
-                cuttingBoard.cutIngredient(this);
+                cuttingBoard.ProcessCutting();
             }
         }
     }
@@ -114,7 +114,7 @@ public class PlayerInteractions : MonoBehaviour
             CuttingBoard cuttingBoard = hitBuffer[i].collider.GetComponentInParent<CuttingBoard>();
             if (cuttingBoard != null && !cuttingBoard.transform.IsChildOf(transform))
             {
-                float score = CalculateInteractableScore(hitBuffer[i], cameraPosition, cameraForward) + 0.5f; // Bonus
+                float score = CalculateInteractableScore(hitBuffer[i], cameraPosition, cameraForward) + 0f; // Bonus
                 if (score > bestScore)
                 {
                     bestScore = score;
@@ -142,7 +142,7 @@ public class PlayerInteractions : MonoBehaviour
         }
 
         // 2. OverlapSphere (detección cercana)
-        if (bestScore < 0.5f)
+        if (bestScore < 0.2f)
         {
             int colliderCount = Physics.OverlapSphereNonAlloc(
                 cameraPosition,
@@ -208,7 +208,7 @@ public class PlayerInteractions : MonoBehaviour
     private void HandleInteractionRaycast()
     {
         GameObject bestTarget = GetBestInteractable();
-
+        Debug.Log(bestTarget);
         if (bestTarget == null)
         {
             currentInteractable = null;
@@ -228,6 +228,7 @@ public class PlayerInteractions : MonoBehaviour
         // Agarrar ingrediente, plato, o receta
         if ((bestTarget.CompareTag(interactTag[1]) || bestTarget.CompareTag(interactTag[4]) || bestTarget.CompareTag(interactTag[2])) && !isDoingAnAction)
         {
+            Debug.Log("Estoy viendo algo agarrable");
             currentInteractable = bestTarget.gameObject;
             interfaceText.text = "Press F to grab";
             textInteractions.SetActive(true);

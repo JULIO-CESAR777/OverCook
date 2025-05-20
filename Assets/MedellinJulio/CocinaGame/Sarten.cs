@@ -63,6 +63,7 @@ public class Sarten : MonoBehaviour
             rb.AddForce(throwDirection.normalized * 10f, ForceMode.Impulse); // Ajusta la fuerza según necesidad
         }
 
+        ingredient.currentState = "Cocido";
         // Limpiar referencias en la sartén
         pan.ingredientOnPan = null;
         pan.readyToCook = false;
