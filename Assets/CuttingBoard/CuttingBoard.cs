@@ -40,76 +40,61 @@ public class CuttingBoard : MonoBehaviour
     {
         if (ingredientOnBoard == null) return;
 
-        // Cambiar el estado del ingrediente a "Cortado"
-        ingredientOnBoard.currentState = "Cortado";
-        
-        // Cambiar el MeshRenderer y MeshFilter para mostrar la versión cortada
-        MeshRenderer renderer = ingredientOnBoard.GetComponent<MeshRenderer>();
-        if (renderer != null && ingredientOnBoard.cutMesh != null)
+        // 1. Cambiar la malla visual
+        MeshFilter filter = ingredientOnBoard.GetComponent<MeshFilter>();
+        if (filter != null && ingredientOnBoard.cutMesh != null)
         {
-            // Aplicar la nueva malla (si está disponible)
-            MeshFilter filter = ingredientOnBoard.GetComponent<MeshFilter>();
-            if (filter != null)
-            {
-                filter.mesh = ingredientOnBoard.cutMesh;
-            }
-            
+            filter.mesh = ingredientOnBoard.cutMesh;
         }
-        
-        ingredientOnBoard.transform.localScale = new Vector3(1.3f, 1.6f, 1.3f);
-        
+
+        // 2. Configurar el collider ANTES de cambiar la escala
         MeshCollider collider = ingredientOnBoard.GetComponent<MeshCollider>();
         if (collider != null && ingredientOnBoard.cutMesh != null)
         {
-            // Actualizar el MeshCollider
-            collider.enabled = false;
-            collider.sharedMesh = null;
-
             collider.sharedMesh = ingredientOnBoard.cutMesh;
-            collider.convex = true; // Si lo necesitas, especialmente si el objeto se mueve o colisiona
+            collider.convex = true;
             collider.enabled = true;
         }
-        
-        ingredientOnBoard.transform.SetParent(null);
-        
-        
-        // Aplicar fuerza para que salte un poquito (opcional)
+
+        // 3. Ajustar escala (opcional, pero si lo necesitas)
+        ingredientOnBoard.transform.localScale = Vector3.one; // Resetear primero
+        ingredientOnBoard.transform.localScale = new Vector3(1.3f, 1.6f, 1.3f);
+
+        // 4. Recalcular bounds del collider
+        if (collider != null)
+        {
+            collider.enabled = false;
+            collider.enabled = true;
+        }
+
+        // 5. Configurar física
         Rigidbody rb = ingredientOnBoard.GetComponent<Rigidbody>();
         if (rb != null)
         {
             rb.isKinematic = false;
             rb.detectCollisions = true;
-            rb.AddForce(Vector3.up * 4f, ForceMode.Impulse);
+            rb.AddForce(Vector3.up * 2f, ForceMode.Impulse); // Fuerza más suave
         }
 
-        // IMPORTANTE: Bloqueamos recoger temporalmente
-        StartCoroutine(EnablePickupAfterDelay(ingredientOnBoard.gameObject, 1f)); // medio segundo
+        // 6. Configurar para poder agarrarlo
+        ingredientOnBoard.currentState = "Cortado";
+        ingredientOnBoard.canBeCut = false;
+        ingredientOnBoard.canBePickedUp = true; // Permitir agarrar inmediatamente
 
-        // 4. Limpiar referencia
+        // 7. Ajustar posición para mejor detección
+        ingredientOnBoard.transform.position += Vector3.up * 0.1f; // Pequeño ajuste vertical
+
+        // 8. Limpiar referencia
         ingredientOnBoard = null;
         progress = 0;
         readyToCut = false;
         interactions.isDoingAnAction = false;
-        
-    }
 
-    private IEnumerator EnablePickupAfterDelay(GameObject ingredient, float delay)
-    {
-        yield return new WaitForSeconds(delay);
-
-        // Al pasar el tiempo, permitimos recogerlo
-        IngredientInstance instance = ingredient.GetComponent<IngredientInstance>();
-        if (instance != null)
-        {
-            instance.canBePickedUp = true; // O cualquier sistema que uses para permitir agarrar
-        }
     }
 
     public void AnimacionCortar()
     {
         knifeAnimator.SetTrigger("Cut");
-
-
     }
 
 }

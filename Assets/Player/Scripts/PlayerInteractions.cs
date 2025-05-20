@@ -179,6 +179,16 @@ public class PlayerInteractions : MonoBehaviour
 
     private float CalculateInteractableScore(RaycastHit hit, Vector3 cameraPosition, Vector3 cameraForward)
     {
+
+        // Bonus para ingredientes cortados
+        IngredientInstance ingredient = hit.collider.GetComponent<IngredientInstance>();
+        if (ingredient != null && ingredient.currentState == "Cortado")
+        {
+            float baseScore = 0.6f; // Score base alto para ingredientes listos
+            float cut_distanceScore = 1f - Mathf.Clamp01(hit.distance / 5f);
+            return baseScore + cut_distanceScore * 0.4f;
+        }
+
         // Calculamos ángulo (0-1 donde 1 es mirando directamente)
         Vector3 directionToTarget = (hit.point - cameraPosition).normalized;
         float angleScore = 1f - Vector3.Angle(cameraForward, directionToTarget) / 90f;
@@ -218,7 +228,6 @@ public class PlayerInteractions : MonoBehaviour
         // Agarrar ingrediente, plato, o receta
         if ((bestTarget.CompareTag(interactTag[1]) || bestTarget.CompareTag(interactTag[4]) || bestTarget.CompareTag(interactTag[2])) && !isDoingAnAction)
         {
-            Debug.Log("Entra al interactuable");
             currentInteractable = bestTarget.gameObject;
             interfaceText.text = "Press F to grab";
             textInteractions.SetActive(true);
