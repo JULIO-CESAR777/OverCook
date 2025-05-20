@@ -222,16 +222,16 @@ public class BetterPlayerInteractions : MonoBehaviour
 
         interactionUI.SetActive(true);
         currentInteractionType = InteractionType.None;
+        if (currentInteractable.CompareTag("Environment"))
+        {
 
+            interactionText.text = "";
+
+        }
         // Check interaction types and set appropriate UI text
         if (!isHoldingObject)
         {
-            if (currentInteractable.CompareTag("Environment"))
-            {
-
-                interactionText.text = "";
-               
-            }
+          
             
             if (currentInteractable.CompareTag(tags.ingredientBoxTag))
             {
@@ -266,6 +266,8 @@ public class BetterPlayerInteractions : MonoBehaviour
         }
         else // When holding an object
         {
+
+
             if (currentInteractable.CompareTag(tags.plateTag) && heldObject.CompareTag(tags.ingredientTag))
             {
                 interactionText.text = "Press [F] to place on plate";
