@@ -10,61 +10,64 @@ public class Sarten : MonoBehaviour
     public bool readyToCook;
     public float progress;
 
-    public bool TryAddIngredient(IngredientInstance ingredient)
+    public bool TryAddIngredient(GameObject grabObject, IngredientInstance ingredient)
     {
         if (ingredient.currentState == "Crudo" && ingredient.canCook)
         {
             ingredient.transform.SetParent(stackingPoint);
             ingredient.transform.localPosition = Vector3.zero;
+            ingredient.transform.rotation = Quaternion.identity;
+
+            Collider col = grabObject.GetComponent<Collider>();
+            if (col != null) col.enabled = false;
+
+            Rigidbody rb = grabObject.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.isKinematic = true;
+                rb.detectCollisions = false;
+            }
+
+            //ingredient.wasAddedToPlate = true;
+
             ingredientOnPan = ingredient;
             readyToCook = true;
+
             return true;
         }
         return false;
     }
 
-    public void CompleteCook()
+    public void CompleteCook(Sarten pan)
     {
-        if (ingredientOnPan == null || ingredientOnPan.cutMesh == null) return;
+        GameObject ingredientGO = pan.ingredientOnPan.gameObject;
+        IngredientInstance ingredient = pan.ingredientOnPan;
 
-        ingredientOnPan.currentState = "Cocinado";
+        ingredientGO.GetComponent<MeshFilter>().mesh = ingredient.cookMesh;
 
-        MeshFilter filter = ingredientOnPan.GetComponent<MeshFilter>();
-        if (filter != null) filter.mesh = ingredientOnPan.cutMesh;
+        // Quitar como hijo de la sartén
+        ingredientGO.transform.SetParent(null);
 
-        MeshRenderer renderer = ingredientOnPan.GetComponent<MeshRenderer>();
-        if (renderer != null) renderer.material.color = Color.gray;
+        // Reactivar físicas
+        Collider col = ingredientGO.GetComponent<Collider>();
+        if (col != null) col.enabled = true;
 
-        MeshCollider col = ingredientOnPan.GetComponent<MeshCollider>();
-        if (col != null)
-        {
-            col.sharedMesh = ingredientOnPan.cutMesh;
-            col.enabled = true;
-        }
-
-        ingredientOnPan.transform.localScale = new Vector3(1.3f, 1.6f, 1.3f);
-        ingredientOnPan.transform.SetParent(null);
-
-        Rigidbody rb = ingredientOnPan.GetComponent<Rigidbody>();
+        Rigidbody rb = ingredientGO.GetComponent<Rigidbody>();
         if (rb != null)
         {
             rb.isKinematic = false;
             rb.detectCollisions = true;
-            rb.AddForce(Vector3.up * 2f, ForceMode.Impulse);
+
+            // Aplicar una fuerza hacia arriba y hacia adelante
+            Vector3 throwDirection = pan.transform.up + pan.transform.forward;
+            rb.AddForce(throwDirection.normalized * 10f, ForceMode.Impulse); // Ajusta la fuerza según necesidad
         }
 
-        StartCoroutine(EnablePickupAfterDelay(ingredientOnPan.gameObject, 1f));
+        // Limpiar referencias en la sartén
+        pan.ingredientOnPan = null;
+        pan.readyToCook = false;
 
-        ingredientOnPan = null;
-        readyToCook = false;
-        progress = 0;
-    }
 
-    private IEnumerator EnablePickupAfterDelay(GameObject ingredient, float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        IngredientInstance instance = ingredient.GetComponent<IngredientInstance>();
-        if (instance != null) instance.canBePickedUp = true;
     }
 
     private void OnCollisionEnter(Collision other)
@@ -72,7 +75,7 @@ public class Sarten : MonoBehaviour
         IngredientInstance ingredient = other.gameObject.GetComponent<IngredientInstance>();
         if (ingredient != null && !ingredient.wasAddedToPlate)
         {
-            if (TryAddIngredient(ingredient))
+            if (TryAddIngredient(other.gameObject, ingredient))
             {
                 ingredient.wasAddedToPlate = true;
             }

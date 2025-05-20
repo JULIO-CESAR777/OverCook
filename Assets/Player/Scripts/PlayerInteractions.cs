@@ -5,36 +5,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public static class DebugExtension
-{
-    public static void DebugWireSphere(Vector3 position, Color color, float radius = 1.0f)
-    {
-        float angle = 10.0f;
-        Vector3 lastPoint = Vector3.zero;
-        Vector3 nextPoint = Vector3.zero;
-        for (int i = 0; i <= 36; i++)
-        {
-            float theta = i * angle * Mathf.Deg2Rad;
-
-            // Draw circle on XZ plane
-            lastPoint = new Vector3(Mathf.Cos(theta - angle * Mathf.Deg2Rad), 0, Mathf.Sin(theta - angle * Mathf.Deg2Rad)) * radius + position;
-            nextPoint = new Vector3(Mathf.Cos(theta), 0, Mathf.Sin(theta)) * radius + position;
-            Debug.DrawLine(lastPoint, nextPoint, color);
-
-            // Draw circle on XY plane
-            lastPoint = new Vector3(Mathf.Cos(theta - angle * Mathf.Deg2Rad), Mathf.Sin(theta - angle * Mathf.Deg2Rad), 0) * radius + position;
-            nextPoint = new Vector3(Mathf.Cos(theta), Mathf.Sin(theta), 0) * radius + position;
-            Debug.DrawLine(lastPoint, nextPoint, color);
-
-            // Draw circle on YZ plane
-            lastPoint = new Vector3(0, Mathf.Cos(theta - angle * Mathf.Deg2Rad), Mathf.Sin(theta - angle * Mathf.Deg2Rad)) * radius + position;
-            nextPoint = new Vector3(0, Mathf.Cos(theta), Mathf.Sin(theta)) * radius + position;
-            Debug.DrawLine(lastPoint, nextPoint, color);
-        }
-    }
-}
-
-
 public class PlayerInteractions : MonoBehaviour
 {
     [Header("Input")]
@@ -100,7 +70,7 @@ public class PlayerInteractions : MonoBehaviour
         if (interactAction.action.IsPressed() && currentInteractable != null && currentInteractable.CompareTag(interactTag[3]))
         {
             CuttingBoard cuttingBoard = currentInteractable.GetComponent<CuttingBoard>();
-            if (cuttingBoard != null && cuttingBoard.ingredientOnBoard != null)
+            if (cuttingBoard != null && cuttingBoard.ingredientOnBoard != null && cuttingBoard.ingredientOnBoard.canBeCut)
             {
                 
                 cuttingBoard.cutIngredient(this);
@@ -108,57 +78,122 @@ public class PlayerInteractions : MonoBehaviour
         }
     }
 
+    #region Obtencion de interactuables
     private GameObject GetBestInteractable()
     {
-        // Opción 1: Chequear objetos en el rayo principal
-        Ray ray = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
-        RaycastHit[] hits = Physics.SphereCastAll(ray, 0.3f, rayDistance);
+        const float sphereCastRadius = 0.3f;
+        const float closeCheckRadius = 0.5f;
+        const float maxDistance = 3f;
+        const float minValidAngle = 45f;
 
-        // Opción 2: Chequear objetos cercanos con OverlapSphere
-        Collider[] closeColliders = Physics.OverlapSphere(mainCamera.transform.position, 0.5f);
+        Transform cameraTransform = mainCamera.transform;
+        Vector3 cameraPosition = cameraTransform.position;
+        Vector3 cameraForward = cameraTransform.forward;
 
-        // Convertir todos los resultados a GameObjects
-        List<GameObject> potentialTargets = new List<GameObject>();
+        // Buffers reutilizables
+        RaycastHit[] hitBuffer = new RaycastHit[8];
+        Collider[] colliderBuffer = new Collider[8];
 
-        // Añadir objetos del SphereCast
-        foreach (RaycastHit hit in hits)
-        {
-            if (!hit.collider.transform.IsChildOf(this.transform))
-            {
-                potentialTargets.Add(hit.collider.gameObject);
-            }
-        }
-
-        // Añadir objetos del OverlapSphere
-        foreach (Collider col in closeColliders)
-        {
-            if (!col.transform.IsChildOf(this.transform) && !potentialTargets.Contains(col.gameObject))
-            {
-                potentialTargets.Add(col.gameObject);
-            }
-        }
-
-        if (potentialTargets.Count == 0)
-            return null;
-
-        // Encontrar el objeto más "frontal"
         GameObject bestTarget = null;
-        float smallestAngle = Mathf.Infinity;
+        float bestScore = 0f;
 
-        foreach (GameObject target in potentialTargets)
+        // 1. SphereCast (detección frontal)
+        int hitCount = Physics.SphereCastNonAlloc(
+            cameraPosition,
+            sphereCastRadius,
+            cameraForward,
+            hitBuffer,
+            maxDistance,
+            Physics.DefaultRaycastLayers,
+            QueryTriggerInteraction.Ignore
+        );
+
+        for (int i = 0; i < hitCount; i++)
         {
-            Vector3 targetDir = (target.transform.position - mainCamera.transform.position).normalized;
-            float angle = Vector3.Angle(mainCamera.transform.forward, targetDir);
-
-            if (angle < smallestAngle)
+            // Buscar específicamente la tabla de cortar
+            CuttingBoard cuttingBoard = hitBuffer[i].collider.GetComponentInParent<CuttingBoard>();
+            if (cuttingBoard != null && !cuttingBoard.transform.IsChildOf(transform))
             {
-                smallestAngle = angle;
-                bestTarget = target;
+                float score = CalculateInteractableScore(hitBuffer[i], cameraPosition, cameraForward) + 0.5f; // Bonus
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    bestTarget = cuttingBoard.gameObject;
+                    continue;
+                }
+            }
+
+            // Lógica normal para otros objetos
+            if (!hitBuffer[i].collider.transform.IsChildOf(transform))
+            {
+                Transform parent = hitBuffer[i].collider.transform;
+                while (parent.parent != null && !parent.parent.IsChildOf(transform))
+                {
+                    parent = parent.parent;
+                }
+
+                float currentScore = CalculateInteractableScore(hitBuffer[i], cameraPosition, cameraForward);
+                if (currentScore > bestScore)
+                {
+                    bestScore = currentScore;
+                    bestTarget = parent.gameObject;
+                }
             }
         }
 
-        return bestTarget;
+        // 2. OverlapSphere (detección cercana)
+        if (bestScore < 0.5f)
+        {
+            int colliderCount = Physics.OverlapSphereNonAlloc(
+                cameraPosition,
+                closeCheckRadius,
+                colliderBuffer,
+                Physics.DefaultRaycastLayers,
+                QueryTriggerInteraction.Ignore
+            );
+
+            for (int i = 0; i < colliderCount; i++)
+            {
+                if (!colliderBuffer[i].transform.IsChildOf(transform))
+                {
+                    Vector3 direction = (colliderBuffer[i].transform.position - cameraPosition).normalized;
+                    float angle = Vector3.Angle(cameraForward, direction);
+
+                    if (angle < minValidAngle)
+                    {
+                        float distance = Vector3.Distance(cameraPosition, colliderBuffer[i].transform.position);
+                        float score = (1f - angle / minValidAngle) * (1f - Mathf.Clamp01(distance / closeCheckRadius));
+
+                        if (score > bestScore)
+                        {
+                            bestScore = score;
+                            bestTarget = colliderBuffer[i].gameObject;
+                        }
+                    }
+                }
+            }
+        }
+
+        return bestScore > 0.25f ? bestTarget : null; // Umbral mínimo
     }
+
+    private float CalculateInteractableScore(RaycastHit hit, Vector3 cameraPosition, Vector3 cameraForward)
+    {
+        // Calculamos ángulo (0-1 donde 1 es mirando directamente)
+        Vector3 directionToTarget = (hit.point - cameraPosition).normalized;
+        float angleScore = 1f - Vector3.Angle(cameraForward, directionToTarget) / 90f;
+
+        // Calculamos distancia (0-1 donde 1 es más cerca)
+        float distanceScore = 1f - Mathf.Clamp01(hit.distance / 5f);
+
+        // Priorizamos objetos más centrados en la pantalla
+        Vector3 screenPoint = mainCamera.WorldToViewportPoint(hit.point);
+        float screenScore = 1f - (Mathf.Abs(screenPoint.x - 0.5f) + Mathf.Abs(screenPoint.y - 0.5f));
+
+        // Combinamos los scores (ajusta los pesos según necesidad)
+        return angleScore * 0.5f + distanceScore * 0.3f + screenScore * 0.2f;
+    }
+    #endregion
 
     private void HandleInteractionRaycast()
     {
@@ -180,15 +215,17 @@ public class PlayerInteractions : MonoBehaviour
             return;
         }
 
-
+        // Agarrar ingrediente, plato, o receta
         if ((bestTarget.CompareTag(interactTag[1]) || bestTarget.CompareTag(interactTag[4]) || bestTarget.CompareTag(interactTag[2])) && !isDoingAnAction)
         {
+            Debug.Log("Entra al interactuable");
             currentInteractable = bestTarget.gameObject;
             interfaceText.text = "Press F to grab";
             textInteractions.SetActive(true);
             return;
         }
 
+        // Colocar un ingrediente
         if (bestTarget.CompareTag(interactTag[2]) && isDoingAnAction)
         {
             currentInteractable = bestTarget.gameObject;
@@ -199,15 +236,21 @@ public class PlayerInteractions : MonoBehaviour
             return;
         }
 
+        // Para la tabla de cortar
         if (bestTarget.CompareTag(interactTag[3]))
         {
-            if (isDoingAnAction && grabObject.CompareTag(interactTag[1]) || bestTarget.gameObject.GetComponent<CuttingBoard>().ingredientOnBoard != null)
+            currentInteractable = bestTarget.gameObject;
+
+            // Comparaciones cuando se tiene el ingrediente en la mano
+            if ((isDoingAnAction && grabObject.CompareTag(interactTag[1]) && grabObject.GetComponent<IngredientInstance>().canBeCut) ||
+                (!isDoingAnAction && bestTarget.gameObject.GetComponent<CuttingBoard>().ingredientOnBoard != null && grabObject == null))
             {
-                currentInteractable = bestTarget.gameObject;
+            
                 interfaceText.text = "Press F to cut";
                 textInteractions.SetActive(true);
                 return;
             }
+            
         }
 
         if (bestTarget.CompareTag(interactTag[5]) && isDoingAnAction && grabObject.CompareTag(interactTag[4]))
@@ -294,7 +337,8 @@ public class PlayerInteractions : MonoBehaviour
             {
                 var cuttingBoard = currentInteractable.GetComponent<CuttingBoard>();
 
-                if (isDoingAnAction && cuttingBoard != null && cuttingBoard.ingredientOnBoard == null)
+                if (isDoingAnAction && cuttingBoard != null && cuttingBoard.ingredientOnBoard == null &&
+                    grabObject.GetComponent<IngredientInstance>().canBeCut)
                 {
                     // Si estamos agarrando algo Y no hay ingrediente en la tabla → colocar ingrediente
                     PlaceIngredientOnCuttingBoard(currentInteractable);
@@ -388,39 +432,57 @@ public class PlayerInteractions : MonoBehaviour
 
         Vector3 originalScale = obj.transform.localScale; // Guardar la escala original
 
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            float t = Mathf.SmoothStep(0, 1, elapsed / duration);
+        // Configurar rotación objetivo especial para la sartén
+        Quaternion panTargetRotation = handPosition.transform.rotation * Quaternion.Euler(0f, -180f, 0f);
 
-            obj.transform.position = Vector3.Lerp(startPosition, targetPosition, t);
-            obj.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, t);
-        
-            // Asegurarse de que la escala no cambie
-            obj.transform.localScale = originalScale;
-
-            yield return null;
-        }
-
-        // Asegurarse de que el objeto conserve la escala original después de moverlo
-        obj.transform.localScale = originalScale;
+        // Desactivar físicas y colisiones mientras se mueve
         Rigidbody rb = obj.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.isKinematic = true; // Desactiva la física mientras se mueve
+            rb.isKinematic = true;
             rb.detectCollisions = false;
         }
 
         Collider col = obj.GetComponent<Collider>();
         if (col != null)
         {
-            col.enabled = false; // Evita colisiones mientras se mueve
+            col.enabled = false;
         }
 
-        // Final del movimiento
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.SmoothStep(0, 1, elapsed / duration);
+
+            obj.transform.position = Vector3.Lerp(startPosition, targetPosition, t);
+
+            if (obj.CompareTag("Pan"))
+            {
+                obj.transform.rotation = Quaternion.Slerp(startRotation, panTargetRotation, t);
+            }
+            else
+            {
+                obj.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, t);
+            }
+
+            obj.transform.localScale = originalScale; // Mantener escala
+
+            yield return null;
+        }
+
+        // Finalizar movimiento y parenting
         obj.transform.SetParent(handPosition.transform);
         obj.transform.localPosition = Vector3.zero;
-        obj.transform.localRotation = Quaternion.identity;
+
+        if (obj.CompareTag("Pan"))
+        {
+            // Rotación absoluta respecto al padre para evitar errores
+            obj.transform.localRotation = Quaternion.Euler(0f, -180f, 0f);
+        }
+        else
+        {
+            obj.transform.localRotation = Quaternion.identity;
+        }
 
         grabObject = obj;
         currentInteractable = null;
@@ -491,80 +553,42 @@ public class PlayerInteractions : MonoBehaviour
         // Intentar añadirlo a la tabla
         CuttingBoard cuttingboard = cuttingBoard.GetComponent<CuttingBoard>();
         if(cuttingboard == null || !cuttingboard.TryAddIngredient(ingredientInstance)) return;
-        
-        // Si pasó la validación, colocarlo sobre la tabla
-        grabObject.transform.SetParent(null);
-        Vector3 top = cuttingBoard.transform.position + Vector3.up * 0.2f;
-        grabObject.transform.position = top;
-        grabObject.transform.rotation = cuttingBoard.transform.rotation;
 
-        Collider col = grabObject.GetComponent<Collider>();
-        if (col != null)
-        {
-            col.enabled = false;
-        }
+        // Mantener el collider del ingrediente deshabilitado
+        Collider ingredientCol = grabObject.GetComponent<Collider>();
+        if (ingredientCol != null) ingredientCol.enabled = false;
 
-        grabObject.transform.SetParent(cuttingBoard.transform); // para que se quede con el plato
+        // Asegurarse que el collider de la tabla esté habilitado
+        Collider boardCol = cuttingBoard.GetComponent<Collider>();
+        if (boardCol != null) boardCol.enabled = true;
+
+        // Posicionamiento
+        grabObject.transform.SetParent(cuttingBoard.transform);
+        grabObject.transform.localPosition = Vector3.up * 0.2f; // Usar localPosition
+        grabObject.transform.localRotation = Quaternion.identity;
+
         grabObject = null;
         ingredientInstance.canBePickedUp = false;
 
         // Restablecer el estado de la acción después de colocar el ingrediente en el plato
         isDoingAnAction = false;
+
+        currentInteractable = cuttingBoard;
          
     }
 
     public void PlaceIngredientOnPan()
     {
-
-        if (grabObject == null)
-        {
-            Debug.LogWarning("No hay objeto en la mano.");
-            return;
-        }
-
         IngredientInstance ingredientInstance = grabObject.GetComponent<IngredientInstance>();
-        if (ingredientInstance == null)
-        {
-            Debug.LogWarning("El objeto agarrado no tiene IngredientInstance.");
-            return;
-        }
 
-        if (currentInteractable == null)
-        {
-            Debug.LogError("El GameObject 'pan' es null.");
-            return;
-        }
+        if (grabObject == null || ingredientInstance == null) return;
 
         Sarten panScript = currentInteractable.GetComponent<Sarten>();
-        if (panScript == null)
-        {
-            Debug.LogError("El objeto con nombre '" + currentInteractable.name + "' no tiene el componente 'Sarten'.");
-            return;
-        }
-
-        if (grabObject == null) return;
-
-       
+        if (panScript == null) return;
 
         // Intenta agregarlo al sartén
-        if (panScript.TryAddIngredient(ingredientInstance))
+        if (panScript.TryAddIngredient(grabObject, ingredientInstance))
         {
-            // Posicionar el ingrediente en el punto de apilamiento
-            grabObject.transform.SetParent(panScript.stackingPoint);
-            grabObject.transform.localPosition = Vector3.zero;
-            grabObject.transform.localRotation = Quaternion.identity;
-
-            Collider col = grabObject.GetComponent<Collider>();
-            if (col != null) col.enabled = false;
-
-            Rigidbody rb = grabObject.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                rb.isKinematic = true;
-                rb.detectCollisions = false;
-            }
-
-            ingredientInstance.wasAddedToPlate = true;
 
             grabObject = null;
             isDoingAnAction = false;
@@ -572,8 +596,6 @@ public class PlayerInteractions : MonoBehaviour
             currentInteractable = null;
         }
     }
-
-    //Julio
 
     public void giveOrder()
     {
@@ -601,19 +623,13 @@ public class PlayerInteractions : MonoBehaviour
     }
 
 
-    private void OnDrawGizmos()
+    void OnDrawGizmosSelected()
     {
-        if (mainCamera == null) return;
-
-        // Esfera de alcance lejano (SphereCast)
-        Gizmos.color = Color.red;
-        Gizmos.DrawRay(mainCamera.transform.position, mainCamera.transform.forward * rayDistance);
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(mainCamera.transform.position + mainCamera.transform.forward * rayDistance, 0.3f);
-        
-        // Esfera de alcance cercano (OverlapSphere)
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(mainCamera.transform.position, 0.5f);
+        if (currentInteractable != null && currentInteractable.CompareTag(interactTag[3]))
+        {
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawWireCube(currentInteractable.transform.position, currentInteractable.GetComponent<Collider>().bounds.size);
+        }
     }
 
 }

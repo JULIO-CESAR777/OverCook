@@ -106,8 +106,11 @@ MonoBehaviour:
   currentState: Crudo
   canBePickedUp: 1
   wasAddedToPlate: 0
+  canCook: 0
+  canBeCut: 1
   cutMesh: {fileID: 4387450455345236887, guid: 2a33aa0ece3aa5f408739ab4ed4c6fde, type: 3}
   cookMesh: {fileID: 0}
+  burnedMesh: {fileID: 0}
 --- !u!54 &8767806808040842639
 Rigidbody:
   m_ObjectHideFlags: 0
