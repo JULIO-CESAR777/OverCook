@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 5753735523942061344}
   - component: {fileID: 5101021974338201250}
   - component: {fileID: 8328884418947342352}
+  - component: {fileID: 5707820755454612562}
   m_Layer: 0
   m_Name: SteakSO
   m_TagString: Ingredient
@@ -107,9 +108,9 @@ MonoBehaviour:
   canBePickedUp: 1
   wasAddedToPlate: 0
   canCook: 1
+  canBeCut: 0
   cutMesh: {fileID: 0}
   cookMesh: {fileID: 1929635338539414733, guid: 367bab942037468409d91209a6d73770, type: 3}
-  burnedMesh: {fileID: -7489542688892551453, guid: 367bab942037468409d91209a6d73770, type: 3}
 --- !u!54 &5753735523942061344
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -224,3 +225,16 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   lockHandOnGrab: 0
+--- !u!114 &5707820755454612562
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7099858932862956820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b3a1fed26d1e57448d9ed38ae3b7620, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineMaterial: {fileID: 2100000, guid: b65128f17c69ea446ad850db2d2aff4d, type: 2}

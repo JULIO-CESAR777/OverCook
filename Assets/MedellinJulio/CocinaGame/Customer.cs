@@ -19,8 +19,7 @@ public class Customer : MonoBehaviour
 
     [Header("Pedido")]
     private RecipeSO selectedRecipe;
-    public GameObject speechBubblePrefab;
-    private GameObject currentSpeechBubble;
+   
    
 
     [Header("Paciencia")]
@@ -102,9 +101,7 @@ public class Customer : MonoBehaviour
     {
 
         esperanding = true;
-        if (speechBubblePrefab != null)
-        {
-            currentSpeechBubble = Instantiate(speechBubblePrefab, transform.position + new Vector3(0, 3f, 0), Quaternion.identity, transform);
+     
             if (patienceSliderPrefab != null)
             {
                 instantiatedSliderGO = Instantiate(patienceSliderPrefab,transform.position + new Vector3(0, 2f, 0),Quaternion.identity,transform);
@@ -117,16 +114,10 @@ public class Customer : MonoBehaviour
                     patienceSlider.value = currentPatience;
                 }
             }
-            var textComponent = currentSpeechBubble.GetComponentInChildren<TextMeshProUGUI>();
-            if (textComponent != null)
+            else
             {
-                textComponent.text = selectedRecipe.recipeName;
+                Debug.LogWarning("No hay prefab de slider asignado.");
             }
-        }
-        else
-        {
-            Debug.LogWarning("No hay prefab de burbuja asignado.");
-        }
     }
 
     public bool ServeOrder(GameObject servedRecipe)
@@ -148,10 +139,6 @@ public class Customer : MonoBehaviour
                 Destroy(instantiatedSliderGO);
             }
 
-            if (currentSpeechBubble != null)
-            {
-                Destroy(currentSpeechBubble);
-            }
             isServed = true;
 
             // Dar puntos al jugador

@@ -158,20 +158,42 @@ public class BetterPlayerInteractions : MonoBehaviour
             }
         }
 
-        // Update current interactable if we found something valid
         if (bestScore > minInteractionScore)
         {
             if (currentInteractable != bestTarget)
             {
+                // Desactivar outline del anterior si era ingrediente
+                if (currentInteractable != null && currentInteractable.CompareTag(tags.ingredientTag))
+                {
+                    var oldOutline = currentInteractable.GetComponent<OutlineController>();
+                    if (oldOutline != null) oldOutline.SetOutline(false);
+                }
+
                 currentInteractable = bestTarget;
+
+                // Activar outline si es ingrediente
+                if (currentInteractable.CompareTag(tags.ingredientTag))
+                {
+                    var newOutline = currentInteractable.GetComponent<OutlineController>();
+                    if (newOutline != null) newOutline.SetOutline(true);
+                }
+
                 UpdateInteractionUI();
             }
         }
         else
         {
+            // Si no hay ningún interactable válido, quitar outline
+            if (currentInteractable != null && currentInteractable.CompareTag(tags.ingredientTag))
+            {
+                var outline = currentInteractable.GetComponent<OutlineController>();
+                if (outline != null) outline.SetOutline(false);
+            }
+
             currentInteractable = null;
             interactionUI.SetActive(false);
         }
+
 
         if (debugMode) Debug.DrawRay(playerCamera.transform.position, playerCamera.transform.forward * interactionDistance, debugRayColor);
     }
@@ -235,7 +257,9 @@ public class BetterPlayerInteractions : MonoBehaviour
             
             if (currentInteractable.CompareTag(tags.ingredientBoxTag))
             {
+                MeshRenderer meshRenderer = currentInteractable.GetComponent<MeshRenderer>();
                 interactionText.text = "Press [F] to spawn ingredient";
+
                 currentInteractionType = InteractionType.Use;
             }
             else if (currentInteractable.CompareTag(tags.ingredientTag))

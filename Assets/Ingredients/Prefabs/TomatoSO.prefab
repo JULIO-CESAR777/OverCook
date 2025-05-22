@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 1027565186803986907}
   - component: {fileID: -6348699342126809625}
   - component: {fileID: 3412233013335450751}
+  - component: {fileID: 3159564046901863748}
   m_Layer: 0
   m_Name: TomatoSO
   m_TagString: Ingredient
@@ -110,7 +111,6 @@ MonoBehaviour:
   canBeCut: 1
   cutMesh: {fileID: 5897541620420230933, guid: 8dcdcab5bf15c5c47863e422a275714f, type: 3}
   cookMesh: {fileID: 0}
-  burnedMesh: {fileID: 0}
 --- !u!54 &1027565186803986907
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -225,3 +225,16 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -5321038836818693795, guid: 8a7de0bba226ad147ad4a23936f3f1db, type: 3}
+--- !u!114 &3159564046901863748
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1786076773959587932}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b3a1fed26d1e57448d9ed38ae3b7620, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineMaterial: {fileID: 2100000, guid: b65128f17c69ea446ad850db2d2aff4d, type: 2}
