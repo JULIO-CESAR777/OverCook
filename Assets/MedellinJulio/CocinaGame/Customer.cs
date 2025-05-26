@@ -19,8 +19,8 @@ public class Customer : MonoBehaviour
 
     [Header("Pedido")]
     private RecipeSO selectedRecipe;
-   
-   
+
+
 
     [Header("Paciencia")]
     public float patienceTime = 10f;
@@ -41,6 +41,9 @@ public class Customer : MonoBehaviour
     private CustomerSpawner spawner;
     private int queueIndex;
 
+    public IconPanel iconPanel;
+
+
     private void Start()
     {
         ChooseRandomRecipe();
@@ -57,12 +60,19 @@ public class Customer : MonoBehaviour
             Debug.LogWarning("No se encontró el objeto 'ExitCustomer' en la escena.");
         }
         // Instanciar slider de paciencia
-       
+
+        iconPanel = FindAnyObjectByType<IconPanel>();
+
+        if (iconPanel == null)
+        {
+            Debug.LogWarning("No se encontró la pantalla externa.");
+        }
+
     }
 
     private void Update()
     {
-        if(esperanding)
+        if (esperanding)
         {
             if (!isServed)
             {
@@ -80,7 +90,7 @@ public class Customer : MonoBehaviour
             }
 
         }
-      
+
     }
 
     private void ChooseRandomRecipe()
@@ -101,29 +111,35 @@ public class Customer : MonoBehaviour
     {
 
         esperanding = true;
-     
-            if (patienceSliderPrefab != null)
-            {
-                instantiatedSliderGO = Instantiate(patienceSliderPrefab,transform.position + new Vector3(0, 2f, 0),Quaternion.identity,transform);
 
-                instantiatedSliderGO.transform.SetParent(transform); // Sigue al cliente
-                patienceSlider = instantiatedSliderGO.GetComponentInChildren<Slider>();
-                if (patienceSlider != null)
-                {
-                    patienceSlider.maxValue = patienceTime;
-                    patienceSlider.value = currentPatience;
-                }
-            }
-            else
+        if (patienceSliderPrefab != null)
+        {
+            instantiatedSliderGO = Instantiate(patienceSliderPrefab, transform.position + new Vector3(0, 2f, 0), Quaternion.identity, transform);
+
+            instantiatedSliderGO.transform.SetParent(transform); // Sigue al cliente
+            patienceSlider = instantiatedSliderGO.GetComponentInChildren<Slider>();
+            if (patienceSlider != null)
             {
-                Debug.LogWarning("No hay prefab de slider asignado.");
+                patienceSlider.maxValue = patienceTime;
+                patienceSlider.value = currentPatience;
             }
+        }
+        else
+        {
+            Debug.LogWarning("No hay prefab de slider asignado.");
+        }
+
+
+        if (iconPanel != null && selectedRecipe != null)
+        {
+            iconPanel.SetRecipeIcon(selectedRecipe.icon);
+        }
     }
 
     public bool ServeOrder(GameObject servedRecipe)
     {
-      
-       
+
+
 
 
         if (servedRecipe.gameObject.name == selectedRecipe.recipeName)
@@ -131,9 +147,9 @@ public class Customer : MonoBehaviour
             ParticleSystem psHappy = Instantiate(particleHappy, transform.position + new Vector3(0, 3f, 0), Quaternion.identity);
             psHappy.Play();
             Destroy(psHappy.gameObject, psHappy.main.duration);
-            
+
             // ✅ Destruir el slider y la burbuja si existen
-            
+
             if (instantiatedSliderGO != null)
             {
                 Destroy(instantiatedSliderGO);
@@ -153,7 +169,7 @@ public class Customer : MonoBehaviour
 
                 //ROTAR LA CAMARAAAAA AAAAAAAAAAAAAAAAAAAAAAAAAAA
                 floating.transform.LookAt(Camera.main.transform);
-                floating.transform.Rotate(0, 180f, 0); 
+                floating.transform.Rotate(0, 180f, 0);
 
                 FloatingPoints fp = floating.GetComponent<FloatingPoints>();
                 if (fp != null)
@@ -161,7 +177,7 @@ public class Customer : MonoBehaviour
                     fp.SetPoints(pointsForOrder);
                 }
             }
-            
+
             //AGREGUE ESTO PARA VRRRRRRRR, ESTOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO NO SE OLVIEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             Destroy(servedRecipe);
             StartCoroutine(MoveToExit());
@@ -173,9 +189,9 @@ public class Customer : MonoBehaviour
             psÑo.Play();
             Destroy(psÑo.gameObject, psÑo.main.duration);
 
-        }   
-      
-       
+        }
+
+
         return false;
     }
 
@@ -186,7 +202,7 @@ public class Customer : MonoBehaviour
         spawner.OnCustomerExit(this);
 
 
-       
+
         Vector3 direction = (exitPosition.position - transform.position).normalized;
         direction.y = 0f;
         Quaternion targetRotation = Quaternion.LookRotation(direction);
@@ -204,6 +220,8 @@ public class Customer : MonoBehaviour
             yield return null;
         }
 
+      
+
         Destroy(gameObject);
     }
 
@@ -217,7 +235,18 @@ public class Customer : MonoBehaviour
         if (target != null)
         {
             StartCoroutine(MoveToQueuePosition(target));
-            
+
+        }
+
+        if (queueIndex == 0)
+        {
+            ShowOrder();
+
+            // Mostrar ícono de receta en la pantalla externa
+            if (iconPanel != null && selectedRecipe != null)
+            {
+                iconPanel.SetRecipeIcon(selectedRecipe.icon);
+            }
         }
     }
 
@@ -234,6 +263,11 @@ public class Customer : MonoBehaviour
             ShowOrder();
         }
     }
+    // Agrega este método público al final:
+    public RecipeSO GetRecipe()
+    {
+        return selectedRecipe;
+    }
 
 
     //AGREGANDO ESTO SOLO PARA VR
@@ -244,9 +278,9 @@ public class Customer : MonoBehaviour
         if (other.CompareTag("Recipe") && esperanding)
         {
             Debug.Log("Entre en lka instancia");
-           
-           ServeOrder(other.gameObject);
-            
+
+            ServeOrder(other.gameObject);
+
         }
     }
 }

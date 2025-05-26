@@ -4,10 +4,11 @@ using UnityEngine;
 
 public class CustomerSpawner : MonoBehaviour
 {
-    [Header("Configuraci�n")]
+    [Header("Configuración")]
     public GameObject customerPrefab;
     public Transform[] queuePositions; // 0 = barra, el resto = fila
     public float spawnDelay = 5f;
+    public IconPanel iconPanel; // ← Añadir esto desde el inspector
 
     private Queue<Customer> customerQueue = new Queue<Customer>();
 
@@ -30,7 +31,6 @@ public class CustomerSpawner : MonoBehaviour
     {
         if (customerQueue.Count >= queuePositions.Length)
         {
-            //Debug.Log("Fila llena, no se puede spawnear otro cliente.");
             return;
         }
 
@@ -41,26 +41,36 @@ public class CustomerSpawner : MonoBehaviour
         newCustomer.SetQueuePosition(this, positionIndex);
 
         customerQueue.Enqueue(newCustomer);
+
+        // Si es el primero, mostrar icono
+        if (positionIndex == 0 && iconPanel != null)
+        {
+            iconPanel.SetRecipeIcon(newCustomer.GetRecipe()?.icon);
+        }
     }
 
-    public void OnCustomerExit(Customer exitedCustomer)
+    public void OnCustomerExit(Customer customer)
     {
-        Queue<Customer> tempQueue = new Queue<Customer>();
+        customerQueue = new Queue<Customer>(customerQueue); // recrea para evitar errores al remover
+        customerQueue = new Queue<Customer>(new List<Customer>(customerQueue).FindAll(c => c != customer));
 
-        foreach (var customer in customerQueue)
+        // Reasignar posiciones
+        int i = 0;
+        foreach (var c in customerQueue)
         {
-            if (customer != exitedCustomer)
-                tempQueue.Enqueue(customer);
+            c.SetQueuePosition(this, i);
+            i++;
         }
 
-        customerQueue = tempQueue;
-
-        // Reorganiza la fila
-        int index = 0;
-        foreach (Customer customer in customerQueue)
+        // Actualizar pantalla externa
+        if (customerQueue.Count > 0)
         {
-            customer.SetQueuePosition(this, index);
-            index++;
+            RecipeSO recipe = customerQueue.Peek().GetRecipe();
+            iconPanel.SetRecipeIcon(recipe != null ? recipe.icon : null);
+        }
+        else
+        {
+            iconPanel.SetRecipeIcon(null);
         }
     }
 

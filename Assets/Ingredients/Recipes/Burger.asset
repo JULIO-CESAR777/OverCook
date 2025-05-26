@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Burger
   m_EditorClassIdentifier: 
   recipeName: Burger
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: ae8ef50944ffba74d947f6b8ba539e87, type: 3}
   ingredientsRequired:
   - ingredient: {fileID: 11400000, guid: 1669d4ea407908b47bb06df3915b2c8b, type: 2}
     requiredState: Crudo
