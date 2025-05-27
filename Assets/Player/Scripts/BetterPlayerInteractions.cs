@@ -2,6 +2,9 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using TMPro;
+using static Unity.Cinemachine.IInputAxisOwner.AxisDescriptor;
+using System.Collections.Generic;
+using UnityEngine.SocialPlatforms.Impl;
 
 [System.Serializable]
 public class InteractionTagSettings
@@ -100,12 +103,22 @@ public class BetterPlayerInteractions : MonoBehaviour
     }
 
     #region Interaction Detection
+    private Dictionary<GameObject, float> interactionScores = new Dictionary<GameObject, float>();
+    private float scoreCacheTime = 0.1f; // Cache for 0.1 seconds
+    private float lastScoreUpdateTime = 0f;
+
     private void FindBestInteractable()
     {
-        GameObject bestTarget = null;
-        float bestScore = 0f;
+        // Only recalculate scores periodically
+        if (Time.time - lastScoreUpdateTime < scoreCacheTime && interactionScores.Count > 0)
+        {
+            FindBestFromCache();
+            return;
+        }
 
-        // Check for direct raycast hits first
+        interactionScores.Clear();
+
+        // Perform sphere cast
         RaycastHit[] hits = Physics.SphereCastAll(
             playerCamera.transform.position,
             sphereCastRadius,
@@ -115,46 +128,67 @@ public class BetterPlayerInteractions : MonoBehaviour
             QueryTriggerInteraction.Ignore
         );
 
+        // Calculate and cache scores
         foreach (var hit in hits)
         {
             if (hit.collider.transform.IsChildOf(transform)) continue;
 
+            GameObject interactable = GetRootInteractable(hit.collider.gameObject);
             float score = CalculateInteractionScore(hit);
-            if (score > bestScore)
+            interactionScores[interactable] = score;
+        }
+
+        // Also check close proximity objects
+        Collider[] closeColliders = Physics.OverlapSphere(
+            playerCamera.transform.position,
+            closeCheckRadius,
+            Physics.DefaultRaycastLayers,
+            QueryTriggerInteraction.Ignore
+        );
+
+        foreach (var collider in closeColliders)
+        {
+            if (collider.transform.IsChildOf(transform)) continue;
+
+            GameObject interactable = GetRootInteractable(collider.gameObject);
+            if (!interactionScores.ContainsKey(interactable))
             {
-                bestScore = score;
-                bestTarget = GetRootInteractable(hit.collider.gameObject);
+                float score = CalculateProximityScore(collider);
+                interactionScores[interactable] = score;
             }
         }
 
-        // Fallback to close proximity check if nothing good found
-        if (bestScore < minInteractionScore * 0.5f)
+        lastScoreUpdateTime = Time.time;
+        FindBestFromCache();
+    }
+
+    private float CalculateProximityScore(Collider collider)
+    {
+        Vector3 direction = (collider.transform.position - playerCamera.transform.position).normalized;
+        float angle = Vector3.Angle(playerCamera.transform.forward, direction);
+        float distance = Vector3.Distance(playerCamera.transform.position, collider.transform.position);
+
+        return (1f - angle / minValidAngle) * (1f - Mathf.Clamp01(distance / closeCheckRadius));
+    }
+
+    private void FindBestFromCache()
+    {
+        GameObject bestTarget = null;
+        float bestScore = 0f;
+
+        foreach (var pair in interactionScores)
         {
-            Collider[] closeColliders = Physics.OverlapSphere(
-                playerCamera.transform.position,
-                closeCheckRadius,
-                Physics.DefaultRaycastLayers,
-                QueryTriggerInteraction.Ignore
-            );
+            if (pair.Key == null) continue;
 
-            foreach (var collider in closeColliders)
+            // Recalculate distance score for cache validation
+            float distance = Vector3.Distance(playerCamera.transform.position, pair.Key.transform.position);
+            float distanceScore = 1f - Mathf.Clamp01(distance / interactionDistance);
+            float currentScore = pair.Value * 0.7f + distanceScore * 0.3f;
+
+            if (currentScore > bestScore)
             {
-                if (collider.transform.IsChildOf(transform)) continue;
-
-                Vector3 direction = (collider.transform.position - playerCamera.transform.position).normalized;
-                float angle = Vector3.Angle(playerCamera.transform.forward, direction);
-
-                if (angle < minValidAngle)
-                {
-                    float distance = Vector3.Distance(playerCamera.transform.position, collider.transform.position);
-                    float score = (1f - angle / minValidAngle) * (1f - Mathf.Clamp01(distance / closeCheckRadius));
-
-                    if (score > bestScore)
-                    {
-                        bestScore = score;
-                        bestTarget = GetRootInteractable(collider.gameObject);
-                    }
-                }
+                bestScore = currentScore;
+                bestTarget = pair.Key;
             }
         }
 
@@ -162,40 +196,46 @@ public class BetterPlayerInteractions : MonoBehaviour
         {
             if (currentInteractable != bestTarget)
             {
-                // Desactivar outline del anterior si era ingrediente
-                if (currentInteractable != null && currentInteractable.CompareTag(tags.ingredientTag))
-                {
-                    var oldOutline = currentInteractable.GetComponent<OutlineController>();
-                    if (oldOutline != null) oldOutline.SetOutline(false);
-                }
-
-                currentInteractable = bestTarget;
-
-                // Activar outline si es ingrediente
-                if (currentInteractable.CompareTag(tags.ingredientTag))
-                {
-                    var newOutline = currentInteractable.GetComponent<OutlineController>();
-                    if (newOutline != null) newOutline.SetOutline(true);
-                }
-
-                UpdateInteractionUI();
+                UpdateCurrentInteractable(bestTarget);
             }
         }
         else
         {
-            // Si no hay ningún interactable válido, quitar outline
-            if (currentInteractable != null && currentInteractable.CompareTag(tags.ingredientTag))
-            {
-                var outline = currentInteractable.GetComponent<OutlineController>();
-                if (outline != null) outline.SetOutline(false);
-            }
+            ClearCurrentInteractable();
+        }
+    }
 
-            currentInteractable = null;
-            interactionUI.SetActive(false);
+    private void UpdateCurrentInteractable(GameObject newInteractable)
+    {
+        // Desactivar outline del anterior si era ingrediente
+        if (currentInteractable != null && currentInteractable.CompareTag(tags.ingredientTag))
+        {
+            var oldOutline = currentInteractable.GetComponent<OutlineController>();
+            if (oldOutline != null) oldOutline.SetOutline(false);
         }
 
+        currentInteractable = newInteractable;
 
-        if (debugMode) Debug.DrawRay(playerCamera.transform.position, playerCamera.transform.forward * interactionDistance, debugRayColor);
+        // Activar outline si es ingrediente
+        if (currentInteractable.CompareTag(tags.ingredientTag))
+        {
+            var newOutline = currentInteractable.GetComponent<OutlineController>();
+            if (newOutline != null) newOutline.SetOutline(true);
+        }
+
+        UpdateInteractionUI();
+    }
+
+    private void ClearCurrentInteractable()
+    {
+        if (currentInteractable != null && currentInteractable.CompareTag(tags.ingredientTag))
+        {
+            var outline = currentInteractable.GetComponent<OutlineController>();
+            if (outline != null) outline.SetOutline(false);
+        }
+
+        currentInteractable = null;
+        interactionUI.SetActive(false);
     }
 
     private GameObject GetRootInteractable(GameObject obj)
@@ -240,6 +280,7 @@ public class BetterPlayerInteractions : MonoBehaviour
     #region Interaction Handling
     private void UpdateInteractionUI()
     {
+        if (interactionUI != null) interactionUI.SetActive(currentInteractable != null);
         if (currentInteractable == null || interactionUI == null) return;
 
         interactionUI.SetActive(true);
@@ -253,8 +294,8 @@ public class BetterPlayerInteractions : MonoBehaviour
         // Check interaction types and set appropriate UI text
         if (!isHoldingObject)
         {
-          
-            
+
+
             if (currentInteractable.CompareTag(tags.ingredientBoxTag))
             {
                 MeshRenderer meshRenderer = currentInteractable.GetComponent<MeshRenderer>();
@@ -290,7 +331,7 @@ public class BetterPlayerInteractions : MonoBehaviour
         }
         else // When holding an object
         {
-
+            if (currentInteractable == null || heldObject == null) return;
 
             if (currentInteractable.CompareTag(tags.plateTag) && heldObject.CompareTag(tags.ingredientTag))
             {
@@ -454,7 +495,7 @@ public class BetterPlayerInteractions : MonoBehaviour
         }
         else if (obj.CompareTag(tags.ingredientTag))
         {
-            return Quaternion.Euler(-90f, 0f, 0f); // Ejemplo para ingredientes
+            return Quaternion.Euler(0f, 0f, 0f); // Ejemplo para ingredientes
         }
 
         return baseRotation;
