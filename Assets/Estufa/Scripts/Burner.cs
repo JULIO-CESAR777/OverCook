@@ -48,8 +48,6 @@ public class Burner : MonoBehaviour
     {
         StopCookingAnimation(); // Por seguridad
 
-        Debug.Log("Esta cocinando");
-
         cookingTween = panTransform
             .DOLocalRotate(new Vector3(0f, 0f, 5f), 0.4f)
             .SetRelative()

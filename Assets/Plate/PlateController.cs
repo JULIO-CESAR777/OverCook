@@ -42,8 +42,6 @@ public class PlateController : MonoBehaviour
     private void StackIngredient(IngredientInstance ingredientInstance)
     {
 
-        Debug.Log("Entro aqui");
-
         Rigidbody rb = ingredientInstance.GetComponent<Rigidbody>();
         if (rb != null)
         {
