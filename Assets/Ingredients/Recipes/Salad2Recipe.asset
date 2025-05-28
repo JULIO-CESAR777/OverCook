@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Salad2Recipe
   m_EditorClassIdentifier: 
   recipeName: EnsaladaPro
-  icon: {fileID: 21300000, guid: 8846eb998a8206a4daa5f66049ca6359, type: 3}
+  icon: {fileID: 21300000, guid: db5329e177273ee4f965a9cb3c45b722, type: 3}
   ingredientsRequired:
   - ingredient: {fileID: 11400000, guid: 544b7a5c796ecbb4a8b8193680383aa8, type: 2}
     requiredState: Cortado
