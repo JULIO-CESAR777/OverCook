@@ -15065,6 +15065,8 @@ MonoBehaviour:
   debugMode: 0
   debugRayColor: {r: 0, g: 1, b: 0, a: 1}
   currentInteractable: {fileID: 0}
+  heldObject: {fileID: 0}
+  isHoldingObject: 0
 --- !u!4 &8661765412684648102
 Transform:
   m_ObjectHideFlags: 0

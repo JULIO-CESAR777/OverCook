@@ -163,7 +163,6 @@ public class Customer : MonoBehaviour
             // Mostrar puntos flotantes
             if (floatingPointsPrefab != null)
             {
-                Debug.Log("Puntos Volando");
                 Vector3 spawnPosition = transform.position + new Vector3(0, 3f, 0);
                 GameObject floating = Instantiate(floatingPointsPrefab, spawnPosition, Quaternion.identity);
 

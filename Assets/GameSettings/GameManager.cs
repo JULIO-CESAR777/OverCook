@@ -35,7 +35,6 @@ public class GameManager : MonoBehaviour
     public void AddPoints(int points)
     {
         score += points;
-        Debug.Log($"Puntos actuales: {score}");
         if (score >= goalScore)
         {
             Debug.Log("¡Meta alcanzada!");
