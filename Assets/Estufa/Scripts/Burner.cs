@@ -31,6 +31,7 @@ public class Burner : MonoBehaviour
         if (pan.progress >= cookingTime) {
             StopCookingAnimation();
             pan.CompleteCook(pan);
+            pan.progress = 0;
         }
     }
 

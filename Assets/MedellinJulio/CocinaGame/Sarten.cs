@@ -28,7 +28,7 @@ public class Sarten : MonoBehaviour
                 rb.detectCollisions = false;
             }
 
-            //ingredient.wasAddedToPlate = true;
+            ingredient.wasAddedToPlate = true;
 
             ingredientOnPan = ingredient;
             readyToCook = true;
@@ -64,10 +64,10 @@ public class Sarten : MonoBehaviour
         }
 
         ingredient.currentState = "Cocido";
+        ingredient.wasAddedToPlate = false;
         // Limpiar referencias en la sartén
         pan.ingredientOnPan = null;
         pan.readyToCook = false;
-
 
     }
 
@@ -76,10 +76,7 @@ public class Sarten : MonoBehaviour
         IngredientInstance ingredient = other.gameObject.GetComponent<IngredientInstance>();
         if (ingredient != null && !ingredient.wasAddedToPlate)
         {
-            if (TryAddIngredient(other.gameObject, ingredient))
-            {
-                ingredient.wasAddedToPlate = true;
-            }
+            TryAddIngredient(other.gameObject, ingredient);
         }
     }
 }

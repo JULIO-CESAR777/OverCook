@@ -312,7 +312,7 @@ public class BetterPlayerInteractions : MonoBehaviour
                 interactionText.text = "Press [F] to place on plate";
                 currentInteractionType = InteractionType.Place;
             }
-            else if (currentInteractable.CompareTag(tags.cuttingBoardTag) && heldObject.CompareTag(tags.ingredientTag))
+            else if (currentInteractable.CompareTag(tags.cuttingBoardTag) && heldObject.CompareTag(tags.ingredientTag) && !currentInteractable.GetComponent<CuttingBoard>().ingredientOnBoard)
             {
                 IngredientInstance ingredient = heldObject.GetComponent<IngredientInstance>();
                 if (ingredient != null && ingredient.canBeCut)

@@ -47,7 +47,7 @@ public class Customer : MonoBehaviour
     private void Start()
     {
         ChooseRandomRecipe();
-        patienceTime = Random.Range(30, 40);
+        patienceTime = Random.Range(50, 60);
         currentPatience = patienceTime;
 
         GameObject exit = GameObject.Find("ExitCustomer");

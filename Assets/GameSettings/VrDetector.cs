@@ -51,7 +51,7 @@ public class VrDetector : MonoBehaviour
             SceneManager.LoadScene("Cooking");
         }
         else {
-            SceneManager.LoadScene("CookingVR");
+            SceneManager.LoadScene("CookingVR2");
         }
     }
 
