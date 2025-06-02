@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine.UI;
 using System.Collections;
 using static UnityEngine.EventSystems.EventTrigger;
+using UnityEngine.SceneManagement;
 
 public class Customer : MonoBehaviour
 {
@@ -42,13 +43,29 @@ public class Customer : MonoBehaviour
     private int queueIndex;
 
     public IconPanel iconPanel;
-
+    private bool flag;
 
     private void Start()
     {
         ChooseRandomRecipe();
-        patienceTime = Random.Range(50, 60);
-        currentPatience = patienceTime;
+
+        Scene scene = SceneManager.GetActiveScene();
+        if (scene.name == "Cooking")
+        {
+            flag = true;
+        }
+
+        if (flag)
+        {
+            patienceTime = 60;
+        }
+        else
+        {
+            patienceTime = 120;
+
+        }
+
+            currentPatience = patienceTime;
 
         GameObject exit = GameObject.Find("ExitCustomer");
         if (exit != null)
