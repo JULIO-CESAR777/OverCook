@@ -5,17 +5,14 @@ using UnityEngine.SocialPlatforms.Impl;
 public class ScoreUI : MonoBehaviour
 {
     public TextMeshProUGUI currentScoreText;
-    public TextMeshProUGUI goalScoreText;
+  
 
     public GameObject WinCanvas;
 
    
     private void Start()
     {
-        if (GameManager.Instance != null)
-        {
-            goalScoreText.text =  GameManager.Instance.goalScore.ToString();
-        }
+       
 
         WinCanvas.SetActive(false);
 
@@ -28,11 +25,7 @@ public class ScoreUI : MonoBehaviour
         {
             currentScoreText.text =  GameManager.Instance.score.ToString();
 
-            if (GameManager.Instance.score >= GameManager.Instance.goalScore)
-            {
-               
-                ShowWinCanvas();
-            }
+          
         }
 
         
